@@ -4,7 +4,7 @@ import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
-import { ArrowLeft, ShoppingBag, MessageCircle, Instagram, Check, Package, Percent } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, MessageCircle, Instagram, Check, Package, Percent, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -13,6 +13,8 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -20,6 +22,8 @@ const ProductDetailPage = () => {
         setLoading(true);
         const response = await axios.get(`${API_URL}/api/products/${id}`);
         setProduct(response.data);
+        setSelectedImageIndex(0);
+        setShowVideo(false);
 
         // Fetch related products from same category
         const relatedRes = await axios.get(`${API_URL}/api/products`, {
@@ -46,6 +50,43 @@ const ProductDetailPage = () => {
   const getImageUrl = (url) => {
     if (!url) return 'https://via.placeholder.com/500';
     return url.startsWith('/') ? `${API_URL}${url}` : url;
+  };
+
+  const getVideoUrl = (url) => {
+    if (!url) return null;
+    return url.startsWith('/') ? `${API_URL}${url}` : url;
+  };
+
+  // Get all images (from images array or fallback to image_url)
+  const getAllImages = () => {
+    if (!product) return [];
+    if (product.images && product.images.length > 0) {
+      return product.images;
+    }
+    return product.image_url ? [product.image_url] : [];
+  };
+
+  const images = product ? getAllImages() : [];
+  const hasVideo = product?.video_url;
+
+  const nextImage = () => {
+    if (showVideo) {
+      setShowVideo(false);
+      setSelectedImageIndex(0);
+    } else if (selectedImageIndex < images.length - 1) {
+      setSelectedImageIndex(prev => prev + 1);
+    } else if (hasVideo) {
+      setShowVideo(true);
+    }
+  };
+
+  const prevImage = () => {
+    if (showVideo) {
+      setShowVideo(false);
+      setSelectedImageIndex(images.length - 1);
+    } else if (selectedImageIndex > 0) {
+      setSelectedImageIndex(prev => prev - 1);
+    }
   };
 
   if (loading) {
@@ -102,29 +143,117 @@ const ProductDetailPage = () => {
 
           {/* Product Details */}
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-16">
-            {/* Image */}
-            <div className="relative">
-              <div className="rounded-[2rem] overflow-hidden border-2 border-[#F3E8FF] shadow-lg">
-                <img
-                  src={getImageUrl(product.image_url)}
-                  alt={product.name}
-                  className="w-full aspect-square object-cover"
-                  data-testid="product-detail-image"
-                />
+            {/* Image Gallery */}
+            <div className="space-y-4">
+              {/* Main Image/Video */}
+              <div className="relative rounded-[2rem] overflow-hidden border-2 border-[#F3E8FF] shadow-lg bg-white">
+                {showVideo && hasVideo ? (
+                  <video
+                    src={getVideoUrl(product.video_url)}
+                    className="w-full aspect-square object-contain bg-black"
+                    controls
+                    autoPlay
+                    data-testid="product-detail-video"
+                  />
+                ) : (
+                  <img
+                    src={getImageUrl(images[selectedImageIndex])}
+                    alt={product.name}
+                    className="w-full aspect-square object-cover"
+                    data-testid="product-detail-image"
+                  />
+                )}
+                
+                {/* Navigation Arrows */}
+                {(images.length > 1 || hasVideo) && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors"
+                      disabled={selectedImageIndex === 0 && !showVideo}
+                    >
+                      <ChevronLeft className="w-6 h-6 text-[#2D283E]" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors"
+                      disabled={selectedImageIndex === images.length - 1 && !hasVideo || showVideo}
+                    >
+                      <ChevronRight className="w-6 h-6 text-[#2D283E]" />
+                    </button>
+                  </>
+                )}
+                
+                {/* Discount Badge */}
+                {hasDiscount && !showVideo && (
+                  <div className="absolute top-4 left-4 bg-[#FFD166] text-[#2D283E] px-4 py-2 rounded-full font-bold text-lg shadow-lg flex items-center gap-2">
+                    <Percent className="w-5 h-5" />
+                    {product.discount_percentage}% OFF
+                  </div>
+                )}
+                
+                {!product.in_stock && !showVideo && (
+                  <div className="absolute top-4 right-4 bg-[#FF4D4F] text-white px-4 py-2 rounded-full font-semibold">
+                    Out of Stock
+                  </div>
+                )}
               </div>
-              
-              {/* Discount Badge */}
-              {hasDiscount && (
-                <div className="absolute top-4 left-4 bg-[#FFD166] text-[#2D283E] px-4 py-2 rounded-full font-bold text-lg shadow-lg flex items-center gap-2">
-                  <Percent className="w-5 h-5" />
-                  {product.discount_percentage}% OFF
+
+              {/* Thumbnail Gallery */}
+              {(images.length > 1 || hasVideo) && (
+                <div className="flex gap-3 overflow-x-auto pb-2">
+                  {images.map((img, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSelectedImageIndex(index);
+                        setShowVideo(false);
+                      }}
+                      className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                        selectedImageIndex === index && !showVideo
+                          ? 'border-[#FF6B9E] ring-2 ring-[#FF6B9E]/30'
+                          : 'border-[#F3E8FF] hover:border-[#FF6B9E]/50'
+                      }`}
+                    >
+                      <img
+                        src={getImageUrl(img)}
+                        alt={`${product.name} ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                  
+                  {/* Video Thumbnail */}
+                  {hasVideo && (
+                    <button
+                      onClick={() => setShowVideo(true)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all relative ${
+                        showVideo
+                          ? 'border-[#82D1B2] ring-2 ring-[#82D1B2]/30'
+                          : 'border-[#F3E8FF] hover:border-[#82D1B2]/50'
+                      }`}
+                    >
+                      <video
+                        src={getVideoUrl(product.video_url)}
+                        className="w-full h-full object-cover"
+                        muted
+                      />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-[#82D1B2] flex items-center justify-center">
+                          <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+                        </div>
+                      </div>
+                    </button>
+                  )}
                 </div>
               )}
               
-              {!product.in_stock && (
-                <div className="absolute top-4 right-4 bg-[#FF4D4F] text-white px-4 py-2 rounded-full font-semibold">
-                  Out of Stock
-                </div>
+              {/* Image Counter */}
+              {images.length > 1 && (
+                <p className="text-center text-sm text-gray-500">
+                  {showVideo ? 'Video' : `Image ${selectedImageIndex + 1} of ${images.length}`}
+                  {hasVideo && !showVideo && ' • Video available'}
+                </p>
               )}
             </div>
 
@@ -194,6 +323,22 @@ const ProductDetailPage = () => {
                   </div>
                   <span className="text-[#2D283E]">Carefully Packaged</span>
                 </div>
+                {images.length > 1 && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-[#FF6B9E]/20 flex items-center justify-center">
+                      <span className="text-[#FF6B9E] text-sm font-bold">{images.length}</span>
+                    </div>
+                    <span className="text-[#2D283E]">Photos showing different angles</span>
+                  </div>
+                )}
+                {hasVideo && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-[#82D1B2]/20 flex items-center justify-center">
+                      <Play className="w-4 h-4 text-[#82D1B2]" />
+                    </div>
+                    <span className="text-[#2D283E]">Video preview available</span>
+                  </div>
+                )}
               </div>
 
               {/* CTA Buttons */}

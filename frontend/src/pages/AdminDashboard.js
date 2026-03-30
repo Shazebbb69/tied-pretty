@@ -204,14 +204,19 @@ const ProductsManagement = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [imagePreview, setImagePreview] = useState('');
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [videoPreview, setVideoPreview] = useState('');
   const fileInputRef = useRef(null);
+  const videoInputRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
     category: '',
     image_url: '',
+    images: [],
+    video_url: '',
     in_stock: true,
     discount_percentage: '0',
     discount_active: false,
@@ -244,27 +249,38 @@ const ProductsManagement = () => {
       price: '',
       category: '',
       image_url: '',
+      images: [],
+      video_url: '',
       in_stock: true,
       discount_percentage: '0',
       discount_active: false,
     });
-    setImagePreview('');
+    setImagePreviews([]);
+    setVideoPreview('');
     setIsDialogOpen(true);
   };
 
   const openEditDialog = (product) => {
     setSelectedProduct(product);
+    const allImages = product.images && product.images.length > 0 
+      ? product.images 
+      : (product.image_url ? [product.image_url] : []);
+    
     setFormData({
       name: product.name,
       description: product.description,
       price: product.price.toString(),
       category: product.category,
-      image_url: product.image_url,
+      image_url: product.image_url || '',
+      images: allImages,
+      video_url: product.video_url || '',
       in_stock: product.in_stock,
       discount_percentage: (product.discount_percentage || 0).toString(),
       discount_active: product.discount_active || false,
     });
-    setImagePreview(product.image_url.startsWith('/') ? `${API_URL}${product.image_url}` : product.image_url);
+    
+    setImagePreviews(allImages.map(img => img.startsWith('/') ? `${API_URL}${img}` : img));
+    setVideoPreview(product.video_url ? (product.video_url.startsWith('/') ? `${API_URL}${product.video_url}` : product.video_url) : '');
     setIsDialogOpen(true);
   };
 
@@ -274,44 +290,115 @@ const ProductsManagement = () => {
   };
 
   const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    setUploading(true);
+    
+    try {
+      for (const file of files) {
+        // Preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreviews(prev => [...prev, reader.result]);
+        };
+        reader.readAsDataURL(file);
+
+        // Upload
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+
+        const response = await axios.post(`${API_URL}/api/upload`, uploadFormData, {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        setFormData(prev => {
+          const newImages = [...prev.images, response.data.url];
+          return {
+            ...prev,
+            images: newImages,
+            image_url: prev.image_url || response.data.url, // Set first image as main
+          };
+        });
+      }
+      toast.success(`${files.length} image(s) uploaded successfully`);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to upload image');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleVideoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
-    reader.readAsDataURL(file);
-
-    // Upload
-    setUploading(true);
+    setUploadingVideo(true);
+    
     try {
+      // Preview
+      const videoUrl = URL.createObjectURL(file);
+      setVideoPreview(videoUrl);
+
+      // Upload
       const uploadFormData = new FormData();
       uploadFormData.append('file', file);
 
-      const response = await axios.post(`${API_URL}/api/upload`, uploadFormData, {
+      const response = await axios.post(`${API_URL}/api/upload/video`, uploadFormData, {
         withCredentials: true,
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      setFormData({ ...formData, image_url: response.data.url });
-      toast.success('Image uploaded successfully');
+      setFormData(prev => ({
+        ...prev,
+        video_url: response.data.url,
+      }));
+      toast.success('Video uploaded successfully');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to upload image');
-      setImagePreview('');
+      toast.error(error.response?.data?.detail || 'Failed to upload video');
+      setVideoPreview('');
     } finally {
-      setUploading(false);
+      setUploadingVideo(false);
+      if (videoInputRef.current) videoInputRef.current.value = '';
     }
+  };
+
+  const removeImage = (index) => {
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setFormData(prev => {
+      const newImages = prev.images.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        images: newImages,
+        image_url: newImages[0] || '',
+      };
+    });
+  };
+
+  const removeVideo = () => {
+    setVideoPreview('');
+    setFormData(prev => ({ ...prev, video_url: '' }));
+  };
+
+  const setMainImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      image_url: prev.images[index],
+    }));
+    toast.success('Main image updated');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.image_url) {
-      toast.error('Please upload a product image');
+    if (!formData.image_url && formData.images.length === 0) {
+      toast.error('Please upload at least one product image');
       return;
     }
 
@@ -320,6 +407,7 @@ const ProductsManagement = () => {
         ...formData,
         price: parseFloat(formData.price),
         discount_percentage: parseFloat(formData.discount_percentage) || 0,
+        image_url: formData.image_url || formData.images[0] || '',
       };
 
       if (selectedProduct) {
@@ -535,51 +623,128 @@ const ProductsManagement = () => {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Image Upload Section */}
+            {/* Multi-Image Upload Section */}
             <div>
-              <Label>Product Image</Label>
-              <div className="mt-2">
-                {imagePreview ? (
-                  <div className="relative w-full h-48 rounded-xl overflow-hidden border-2 border-[#F3E8FF]">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview('');
-                        setFormData({ ...formData, image_url: '' });
-                      }}
-                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-48 rounded-xl border-2 border-dashed border-[#F3E8FF] flex flex-col items-center justify-center cursor-pointer hover:border-[#FF6B9E] transition-colors bg-[#FAFAFA]"
-                  >
-                    {uploading ? (
-                      <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#FF6B9E] border-t-transparent"></div>
-                    ) : (
-                      <>
-                        <Upload className="w-10 h-10 text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-500">Click to upload image</p>
-                        <p className="text-xs text-gray-400 mt-1">JPEG, PNG, WebP or GIF</p>
-                      </>
-                    )}
+              <Label className="flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-[#FF6B9E]" />
+                Product Images
+                <span className="text-xs text-gray-400">(Multiple allowed)</span>
+              </Label>
+              <div className="mt-2 space-y-3">
+                {/* Image Grid */}
+                {imagePreviews.length > 0 && (
+                  <div className="grid grid-cols-3 gap-3">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className={`relative rounded-xl overflow-hidden border-2 ${formData.image_url === formData.images[index] ? 'border-[#FF6B9E] ring-2 ring-[#FF6B9E]/30' : 'border-[#F3E8FF]'}`}>
+                        <img
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-24 object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-colors flex items-center justify-center gap-1 opacity-0 hover:opacity-100">
+                          <button
+                            type="button"
+                            onClick={() => setMainImage(index)}
+                            className="p-1.5 bg-[#FFD166] text-white rounded-full hover:bg-[#FFA500]"
+                            title="Set as main image"
+                          >
+                            <Star className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600"
+                            title="Remove image"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                        {formData.image_url === formData.images[index] && (
+                          <div className="absolute top-1 left-1 bg-[#FF6B9E] text-white text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+                            Main
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
+                
+                {/* Add More Images Button */}
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full h-32 rounded-xl border-2 border-dashed border-[#F3E8FF] flex flex-col items-center justify-center cursor-pointer hover:border-[#FF6B9E] transition-colors bg-[#FAFAFA]"
+                >
+                  {uploading ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#FF6B9E] border-t-transparent"></div>
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-500">{imagePreviews.length > 0 ? 'Add more images' : 'Click to upload images'}</p>
+                      <p className="text-xs text-gray-400 mt-1">JPEG, PNG, WebP or GIF • Different angles, sizes, colors</p>
+                    </>
+                  )}
+                </div>
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="image/jpeg,image/png,image/webp,image/gif"
                   onChange={handleImageUpload}
                   className="hidden"
+                  multiple
                   data-testid="product-image-upload"
+                />
+              </div>
+            </div>
+
+            {/* Video Upload Section */}
+            <div>
+              <Label className="flex items-center gap-2">
+                <span className="text-[#82D1B2]">▶</span>
+                Product Video
+                <span className="text-xs text-gray-400">(Optional - max 50MB)</span>
+              </Label>
+              <div className="mt-2">
+                {videoPreview ? (
+                  <div className="relative rounded-xl overflow-hidden border-2 border-[#82D1B2]">
+                    <video
+                      src={videoPreview}
+                      className="w-full h-40 object-cover"
+                      controls
+                      muted
+                    />
+                    <button
+                      type="button"
+                      onClick={removeVideo}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => videoInputRef.current?.click()}
+                    className="w-full h-32 rounded-xl border-2 border-dashed border-[#82D1B2]/50 flex flex-col items-center justify-center cursor-pointer hover:border-[#82D1B2] transition-colors bg-[#82D1B2]/5"
+                  >
+                    {uploadingVideo ? (
+                      <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#82D1B2] border-t-transparent"></div>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 rounded-full bg-[#82D1B2]/20 flex items-center justify-center mb-2">
+                          <span className="text-2xl text-[#82D1B2]">▶</span>
+                        </div>
+                        <p className="text-sm text-gray-500">Click to upload video</p>
+                        <p className="text-xs text-gray-400 mt-1">MP4, WebM, MOV or AVI</p>
+                      </>
+                    )}
+                  </div>
+                )}
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
+                  onChange={handleVideoUpload}
+                  className="hidden"
+                  data-testid="product-video-upload"
                 />
               </div>
             </div>

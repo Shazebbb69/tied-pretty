@@ -64,6 +64,8 @@ class ProductCreate(BaseModel):
     price: float
     category: str
     image_url: str = ""
+    images: List[str] = []
+    video_url: str = ""
     in_stock: bool = True
     discount_percentage: float = 0
     discount_active: bool = False
@@ -75,6 +77,8 @@ class ProductUpdate(BaseModel):
     price: Optional[float] = None
     category: Optional[str] = None
     image_url: Optional[str] = None
+    images: Optional[List[str]] = None
+    video_url: Optional[str] = None
     in_stock: Optional[bool] = None
     discount_percentage: Optional[float] = None
     discount_active: Optional[bool] = None
@@ -87,6 +91,8 @@ class ProductResponse(BaseModel):
     price: float
     category: str
     image_url: str
+    images: List[str] = []
+    video_url: str = ""
     in_stock: bool
     created_at: str
     discount_percentage: float = 0
@@ -286,7 +292,38 @@ async def upload_image(file: UploadFile = File(...), request: Request = None):
     
     # Return the public URL
     image_url = f"/uploads/{unique_filename}"
-    return {"url": image_url, "filename": unique_filename}
+    return {"url": image_url, "filename": unique_filename, "type": "image"}
+
+@api_router.post("/upload/video")
+async def upload_video(file: UploadFile = File(...), request: Request = None):
+    await require_admin(request)
+    
+    # Validate file type
+    allowed_types = ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file type. Only MP4, WebM, MOV, and AVI are allowed.")
+    
+    # Check file size (max 50MB)
+    content = await file.read()
+    if len(content) > 50 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Video file too large. Maximum size is 50MB.")
+    
+    # Create uploads directory if it doesn't exist
+    upload_dir = Path("/app/frontend/public/uploads/videos")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    file_ext = file.filename.split(".")[-1] if "." in file.filename else "mp4"
+    unique_filename = f"{uuid.uuid4()}.{file_ext}"
+    file_path = upload_dir / unique_filename
+    
+    # Save file
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    # Return the public URL
+    video_url = f"/uploads/videos/{unique_filename}"
+    return {"url": video_url, "filename": unique_filename, "type": "video"}
 
 # ==================== CATEGORY ROUTES ====================
 
