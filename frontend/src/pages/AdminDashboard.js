@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
-  Heart,
   LayoutDashboard,
   Package,
   Tag,
@@ -507,9 +506,9 @@ const AdminDashboard = () => {
           {/* Logo */}
           <div className="p-4 border-b border-[#F3E8FF]">
             <Link to="/" className="flex items-center gap-2">
-              <Heart className="w-8 h-8 text-[#FF6B9E] fill-[#FF6B9E]" />
+              <img src="https://customer-assets.emergentagent.com/job_craft-corner-23/artifacts/zjr1h6m2_Screenshot_2026-03-30-21-43-48-964_com.instagram.android-edit.jpg" alt="tiedprettyy" className="w-10 h-10 rounded-full object-cover" />
               <span className="text-xl font-bold text-[#2D283E]" style={{ fontFamily: 'Fredoka, sans-serif' }}>
-                TP LoveCo
+                tiedprettyy
               </span>
             </Link>
           </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Heart, Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AdminLoginPage = () => {
@@ -61,12 +61,12 @@ const AdminLoginPage = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
-            <Heart className="w-10 h-10 text-[#FF6B9E] fill-[#FF6B9E]" />
+            <img src="https://customer-assets.emergentagent.com/job_craft-corner-23/artifacts/zjr1h6m2_Screenshot_2026-03-30-21-43-48-964_com.instagram.android-edit.jpg" alt="tiedprettyy" className="w-12 h-12 rounded-full object-cover" />
             <span 
               className="text-3xl font-bold text-[#2D283E]"
               style={{ fontFamily: 'Fredoka, sans-serif' }}
             >
-              TP LoveCo
+              tiedprettyy
             </span>
           </div>
           <h1 

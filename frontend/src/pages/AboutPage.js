@@ -2,7 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { Heart, Sparkles, Gift, Star, Users, Package } from 'lucide-react';
+import { Sparkles, Gift, Star, Users, Package, Heart } from 'lucide-react';
+
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_craft-corner-23/artifacts/zjr1h6m2_Screenshot_2026-03-30-21-43-48-964_com.instagram.android-edit.jpg";
 
 const AboutPage = () => {
   const features = [
@@ -40,7 +42,7 @@ const AboutPage = () => {
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-6 border-2 border-[#F3E8FF]">
-                  <Heart className="w-4 h-4 text-[#FF6B9E] fill-[#FF6B9E]" />
+                  <img src={LOGO_URL} alt="tiedprettyy" className="w-6 h-6 rounded-full object-cover" />
                   <span className="text-sm font-medium text-[#2D283E]">Our Story</span>
                 </div>
                 
@@ -49,11 +51,11 @@ const AboutPage = () => {
                   style={{ fontFamily: 'Fredoka, sans-serif' }}
                   data-testid="about-title"
                 >
-                  About <span className="text-[#FF6B9E]">TP LoveCo</span>
+                  About <span className="text-[#FF6B9E]">tiedprettyy</span>
                 </h1>
                 
                 <p className="text-lg text-gray-600 leading-relaxed mb-6">
-                  Welcome to TP LoveCo! We're a small home-based business dedicated to creating beautiful handmade crafts that bring joy to people's lives.
+                  Welcome to tiedprettyy! We're a small home-based business dedicated to creating beautiful handmade crafts that bring joy to people's lives.
                 </p>
                 
                 <p className="text-lg text-gray-600 leading-relaxed">

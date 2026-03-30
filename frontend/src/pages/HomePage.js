@@ -8,6 +8,7 @@ import CategoryCard from '../components/CategoryCard';
 import { ArrowRight, Heart, Sparkles, Gift, Star } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_craft-corner-23/artifacts/zjr1h6m2_Screenshot_2026-03-30-21-43-48-964_com.instagram.android-edit.jpg";
 
 const HomePage = () => {
   const [categories, setCategories] = useState([]);

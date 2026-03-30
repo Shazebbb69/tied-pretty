@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Instagram, MessageCircle, Mail, MapPin } from 'lucide-react';
+import { Instagram, MessageCircle, Heart } from 'lucide-react';
+
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_craft-corner-23/artifacts/zjr1h6m2_Screenshot_2026-03-30-21-43-48-964_com.instagram.android-edit.jpg";
 
 const Footer = () => {
   const categories = [
@@ -20,9 +22,9 @@ const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4" data-testid="footer-logo">
-              <Heart className="w-8 h-8 text-[#FF6B9E] fill-[#FF6B9E]" />
+              <img src="https://customer-assets.emergentagent.com/job_craft-corner-23/artifacts/zjr1h6m2_Screenshot_2026-03-30-21-43-48-964_com.instagram.android-edit.jpg" alt="tiedprettyy" className="w-10 h-10 rounded-full object-cover" />
               <span className="text-2xl font-bold" style={{ fontFamily: 'Fredoka, sans-serif' }}>
-                TP LoveCo
+                tiedprettyy
               </span>
             </Link>
             <p className="text-gray-300 text-sm leading-relaxed mb-4">
@@ -136,7 +138,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} TP LoveCo. All rights reserved.
+            © {new Date().getFullYear()} tiedprettyy. All rights reserved.
           </p>
           <p className="text-gray-400 text-sm flex items-center gap-1">
             Made with <Heart className="w-4 h-4 text-[#FF6B9E] fill-[#FF6B9E]" /> in India

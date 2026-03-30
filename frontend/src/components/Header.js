@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Heart, ShoppingBag } from 'lucide-react';
+import { Menu, X, ShoppingBag } from 'lucide-react';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,9 +24,9 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2" data-testid="header-logo">
-            <Heart className="w-8 h-8 text-[#FF6B9E] fill-[#FF6B9E]" />
+            <img src="https://customer-assets.emergentagent.com/job_craft-corner-23/artifacts/zjr1h6m2_Screenshot_2026-03-30-21-43-48-964_com.instagram.android-edit.jpg" alt="tiedprettyy" className="w-10 h-10 rounded-full object-cover" />
             <span className="text-xl md:text-2xl font-bold text-[#2D283E]" style={{ fontFamily: 'Fredoka, sans-serif' }}>
-              TP LoveCo
+              tiedprettyy
             </span>
           </Link>
 

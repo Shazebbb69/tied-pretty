@@ -29,7 +29,7 @@ JWT_SECRET = os.environ.get("JWT_SECRET", secrets.token_hex(32))
 JWT_ALGORITHM = "HS256"
 
 # Create the main app
-app = FastAPI(title="TP LoveCo API")
+app = FastAPI(title="tiedprettyy API")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -256,7 +256,7 @@ async def get_categories():
 
 @api_router.get("/")
 async def root():
-    return {"message": "TP LoveCo API is running"}
+    return {"message": "tiedprettyy API is running"}
 
 @api_router.get("/health")
 async def health():

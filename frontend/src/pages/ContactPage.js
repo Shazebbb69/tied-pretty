@@ -1,7 +1,9 @@
 import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { MessageCircle, Instagram, Heart, Clock, MapPin } from 'lucide-react';
+import { MessageCircle, Instagram, Clock } from 'lucide-react';
+
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_craft-corner-23/artifacts/zjr1h6m2_Screenshot_2026-03-30-21-43-48-964_com.instagram.android-edit.jpg";
 
 const ContactPage = () => {
   const contactMethods = [
@@ -36,7 +38,7 @@ const ContactPage = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center max-w-3xl mx-auto">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-6 border-2 border-[#F3E8FF]">
-                <Heart className="w-4 h-4 text-[#FF6B9E] fill-[#FF6B9E]" />
+                <img src={LOGO_URL} alt="tiedprettyy" className="w-6 h-6 rounded-full object-cover" />
                 <span className="text-sm font-medium text-[#2D283E]">Get in Touch</span>
               </div>
               
