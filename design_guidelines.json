@@ -1,0 +1,73 @@
+{
+  "theme": "light",
+  "archetype": "6 (Vibrant Play) + 3 (Pastel & Soft)",
+  "colors": {
+    "background": "#FFFDF7",
+    "foreground": "#2D283E",
+    "primary": "#FF6B9E",
+    "primary_foreground": "#FFFFFF",
+    "secondary": "#82D1B2",
+    "secondary_foreground": "#2D283E",
+    "accent": "#FFD166",
+    "accent_foreground": "#2D283E",
+    "card": "#FFFFFF",
+    "card_foreground": "#2D283E",
+    "border": "#F3E8FF",
+    "muted": "#F3F4F6",
+    "destructive": "#FF4D4F"
+  },
+  "typography": {
+    "heading_font": "Fredoka",
+    "body_font": "Nunito",
+    "scale": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight font-bold",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight font-semibold",
+      "h3": "text-xl sm:text-2xl tracking-tight font-medium",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-base leading-relaxed"
+    }
+  },
+  "layout_spacing": {
+    "container_padding": "px-4 sm:px-6 md:px-8 lg:px-12 max-w-7xl mx-auto",
+    "section_gap": "py-16 md:py-24",
+    "bento_gap": "gap-4 sm:gap-6 md:gap-8",
+    "border_radius": {
+      "sm": "rounded-lg",
+      "md": "rounded-xl",
+      "lg": "rounded-[2rem]",
+      "full": "rounded-full"
+    }
+  },
+  "surface_strategies": {
+    "cards": "bg-white border-2 border-[#F3E8FF] rounded-[2rem] overflow-hidden shadow-sm",
+    "header": "backdrop-blur-xl bg-white/80 sticky top-0 z-50 border-b-2 border-[#F3E8FF]",
+    "neo_brutalist_accents": "shadow-[6px_6px_0px_#FF6B9E] md:shadow-[8px_8px_0px_#FF6B9E] border-2 border-[#2D283E]"
+  },
+  "motion": {
+    "hover_button": "hover:-translate-y-1 hover:shadow-[4px_4px_0px_#FF6B9E] transition-all duration-200 active:translate-y-0 active:shadow-none",
+    "hover_card": "hover:-translate-y-2 hover:shadow-[8px_8px_0px_#FFD166] transition-all duration-300 ease-out"
+  },
+  "image_urls": {
+    "hero_background": "https://images.pexels.com/photos/16228896/pexels-photo-16228896.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "hero_accent": "https://images.pexels.com/photos/5659919/pexels-photo-5659919.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "category_hamper": "https://images.unsplash.com/photo-1508899203029-1c9eb493c9bd?crop=entropy&cs=srgb&fm=jpg&ixlib=rb-4.1.0&q=85",
+    "category_bouquet": "https://images.pexels.com/photos/879198/pexels-photo-879198.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "category_keychain": "https://images.pexels.com/photos/35101964/pexels-photo-35101964.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "category_hair_accessories": "https://images.pexels.com/photos/5642831/pexels-photo-5642831.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "category_plushie": "https://images.unsplash.com/photo-1753370241593-9cc8c17d7434?crop=entropy&cs=srgb&fm=jpg&ixlib=rb-4.1.0&q=85",
+    "category_album": "https://images.unsplash.com/photo-1706931333738-87738429e35b?crop=entropy&cs=srgb&fm=jpg&ixlib=rb-4.1.0&q=85",
+    "category_embroidery": "https://images.pexels.com/photos/35360708/pexels-photo-35360708.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "about_us": "https://images.pexels.com/photos/4601228/pexels-photo-4601228.png?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+  },
+  "instructions_to_main_agent": [
+    "Install and use 'Fredoka' and 'Nunito' fonts from Google Fonts.",
+    "This is an e-commerce platform for handmade items (@tp._loveco). The brand must feel colorful, playful, vibrant, and tactile. Do NOT use standard flat corporate SaaS UI.",
+    "For primary call-to-action buttons, implement a subtle neo-brutalist style (rounded corners, but sharp colorful drop shadow offset).",
+    "Home Page: Use an asymmetric Bento Grid for the category navigation (Hamper, Bouquet, Keychain, Hair Accessories, Plushie, Custom Album, Custom Embroidery). Each grid item should have an image and a label.",
+    "Product Listing: Adopt an Amazon-style card layout but heavily stylized for the brand. Image on top (aspect-square, rounded-t-[2rem]), price below in bold primary text, title in body font.",
+    "Contact Section: Clearly feature the WhatsApp number (6388533973) and Instagram link (@tp._loveco) using prominent buttons with Lucide React or Phosphor icons.",
+    "Admin Panel: Use Shadcn components extensively here. Ensure forms, tables, and product management lists are clean, accessible, and high-contrast. The Admin area can be more subdued (Archetype 4) for usability, but retain brand colors in primary buttons.",
+    "Ensure all interactive elements have data-testid attributes for testing.",
+    "Hero Section: Use a soft, pastel overlay on the hero image or layout to prevent text from blending in. If using the hero image, apply bg-white/40 or bg-[#FFFDF7]/60 so it feels warm and bright, rather than a dark muddy overlay."
+  ]
+}
