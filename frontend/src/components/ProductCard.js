@@ -27,7 +27,7 @@ const ProductCard = ({ product }) => {
     <div className="product-card group" data-testid={`product-card-${product.id}`}>
       <Link to={`/product/${product.id}`} className="block">
         {/* Image Container */}
-        <div className="relative overflow-hidden">
+        <div className="relative overflow-hidden rounded-t-xl sm:rounded-t-2xl">
           <img
             src={getImageUrl(product.image_url)}
             alt={product.name}
@@ -37,14 +37,14 @@ const ProductCard = ({ product }) => {
           
           {/* Discount Badge */}
           {hasDiscount && (
-            <div className="absolute top-3 left-3 bg-[#FFD166] text-[#2D283E] px-3 py-1 rounded-full font-bold text-sm shadow-md">
+            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-[#FFD166] text-[#2D283E] px-2 py-0.5 sm:px-3 sm:py-1 rounded-full font-bold text-xs sm:text-sm shadow-md">
               {product.discount_percentage}% OFF
             </div>
           )}
           
           {!product.in_stock && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span className="bg-white text-[#2D283E] px-4 py-2 rounded-full font-semibold text-sm">
+              <span className="bg-white text-[#2D283E] px-2 py-1 sm:px-4 sm:py-2 rounded-full font-semibold text-xs sm:text-sm">
                 Out of Stock
               </span>
             </div>
@@ -52,31 +52,31 @@ const ProductCard = ({ product }) => {
         </div>
 
         {/* Content */}
-        <div className="p-4">
+        <div className="p-2 sm:p-4">
           {/* Category Badge */}
-          <span className="inline-block px-3 py-1 bg-[#F3E8FF] text-[#FF6B9E] text-xs font-semibold rounded-full mb-2 capitalize">
+          <span className="inline-block px-2 py-0.5 sm:px-3 sm:py-1 bg-[#F3E8FF] text-[#FF6B9E] text-[10px] sm:text-xs font-semibold rounded-full mb-1 sm:mb-2 capitalize">
             {product.category.replace('-', ' ')}
           </span>
 
           {/* Title */}
-          <h3 className="font-semibold text-[#2D283E] text-lg mb-2 line-clamp-2" style={{ fontFamily: 'Fredoka, sans-serif' }}>
+          <h3 className="font-semibold text-[#2D283E] text-sm sm:text-lg mb-1 sm:mb-2 line-clamp-2" style={{ fontFamily: 'Fredoka, sans-serif' }}>
             {product.name}
           </h3>
 
           {/* Price */}
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between gap-1">
+            <div className="min-w-0 flex-1">
               {hasDiscount ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-xl font-bold text-[#FF6B9E]" data-testid={`product-price-${product.id}`}>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+                  <span className="text-base sm:text-xl font-bold text-[#FF6B9E]" data-testid={`product-price-${product.id}`}>
                     {formatPrice(discountedPrice)}
                   </span>
-                  <span className="text-sm text-gray-400 line-through">
+                  <span className="text-xs sm:text-sm text-gray-400 line-through">
                     {formatPrice(product.price)}
                   </span>
                 </div>
               ) : (
-                <span className="text-xl font-bold text-[#FF6B9E]" data-testid={`product-price-${product.id}`}>
+                <span className="text-base sm:text-xl font-bold text-[#FF6B9E]" data-testid={`product-price-${product.id}`}>
                   {formatPrice(product.price)}
                 </span>
               )}
@@ -88,10 +88,10 @@ const ProductCard = ({ product }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="p-2 bg-[#25D366] text-white rounded-full hover:scale-110 transition-transform"
+                className="p-1.5 sm:p-2 bg-[#25D366] text-white rounded-full hover:scale-110 transition-transform flex-shrink-0"
                 data-testid={`product-order-btn-${product.id}`}
               >
-                <ShoppingBag className="w-5 h-5" />
+                <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
             )}
           </div>

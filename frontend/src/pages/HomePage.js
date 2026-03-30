@@ -38,41 +38,41 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col" data-testid="home-page">
+    <div className="min-h-screen flex flex-col overflow-x-hidden" data-testid="home-page">
       <Header />
       
-      <main className="flex-1">
+      <main className="flex-1 overflow-x-hidden">
         {/* Hero Section */}
         <section className="relative overflow-hidden" data-testid="hero-section">
           <div className="hero-gradient absolute inset-0" />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 md:py-24 relative">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
               {/* Left Content */}
               <div className="text-center md:text-left">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm mb-6 border-2 border-[#F3E8FF]">
-                  <Sparkles className="w-4 h-4 text-[#FFD166]" />
-                  <span className="text-sm font-medium text-[#2D283E]">Handcrafted with Love</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-full shadow-sm mb-4 sm:mb-6 border-2 border-[#F3E8FF]">
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-[#FFD166]" />
+                  <span className="text-xs sm:text-sm font-medium text-[#2D283E]">Handcrafted with Love</span>
                 </div>
                 
                 <h1 
-                  className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2D283E] mb-6 leading-tight"
+                  className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#2D283E] mb-4 sm:mb-6 leading-tight"
                   style={{ fontFamily: 'Fredoka, sans-serif' }}
                 >
                   Unique <span className="text-[#FF6B9E]">Handmade</span> Gifts for Your Loved Ones
                 </h1>
                 
-                <p className="text-lg text-gray-600 mb-8 max-w-lg mx-auto md:mx-0">
+                <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-6 sm:mb-8 max-w-lg mx-auto md:mx-0">
                   Discover beautiful crochet creations, bouquets, keychains, and more. Each piece is crafted with care and made especially for you.
                 </p>
                 
-                <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start">
+                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-center md:justify-start">
                   <Link
                     to="/products"
                     className="btn-neo bg-[#FF6B9E] text-white w-full sm:w-auto text-center"
                     data-testid="hero-shop-btn"
                   >
                     Shop Now
-                    <ArrowRight className="w-5 h-5 inline ml-2" />
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 inline ml-2" />
                   </Link>
                   <a
                     href="https://wa.me/916388533973"
@@ -81,7 +81,7 @@ const HomePage = () => {
                     className="whatsapp-btn w-full sm:w-auto justify-center"
                     data-testid="hero-whatsapp-btn"
                   >
-                    <Gift className="w-5 h-5" />
+                    <Gift className="w-4 h-4 sm:w-5 sm:h-5" />
                     Custom Order
                   </a>
                 </div>

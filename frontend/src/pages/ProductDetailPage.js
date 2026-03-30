@@ -130,23 +130,23 @@ const ProductDetailPage = () => {
       <Header />
 
       <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-12">
           {/* Back Button */}
           <Link
             to="/products"
-            className="inline-flex items-center gap-2 text-[#2D283E] hover:text-[#FF6B9E] transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-[#2D283E] hover:text-[#FF6B9E] transition-colors mb-6"
             data-testid="back-to-products-btn"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span className="font-medium">Back to Products</span>
+            <span className="font-medium text-sm sm:text-base">Back to Products</span>
           </Link>
 
           {/* Product Details */}
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 mb-16">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-12 mb-12">
             {/* Image Gallery */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Main Image/Video */}
-              <div className="relative rounded-[2rem] overflow-hidden border-2 border-[#F3E8FF] shadow-lg bg-white">
+              <div className="relative rounded-2xl sm:rounded-[2rem] overflow-hidden border-2 border-[#F3E8FF] shadow-lg bg-white">
                 {showVideo && hasVideo ? (
                   <video
                     src={getVideoUrl(product.video_url)}
@@ -169,14 +169,14 @@ const ProductDetailPage = () => {
                   <>
                     <button
                       onClick={prevImage}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors"
+                      className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors"
                       disabled={selectedImageIndex === 0 && !showVideo}
                     >
-                      <ChevronLeft className="w-6 h-6 text-[#2D283E]" />
+                      <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-[#2D283E]" />
                     </button>
                     <button
                       onClick={nextImage}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors"
+                      className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors"
                       disabled={selectedImageIndex === images.length - 1 && !hasVideo || showVideo}
                     >
                       <ChevronRight className="w-6 h-6 text-[#2D283E]" />
@@ -201,7 +201,7 @@ const ProductDetailPage = () => {
 
               {/* Thumbnail Gallery */}
               {(images.length > 1 || hasVideo) && (
-                <div className="flex gap-3 overflow-x-auto pb-2">
+                <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 -mx-1 px-1">
                   {images.map((img, index) => (
                     <button
                       key={index}
@@ -209,7 +209,7 @@ const ProductDetailPage = () => {
                         setSelectedImageIndex(index);
                         setShowVideo(false);
                       }}
-                      className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                      className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all ${
                         selectedImageIndex === index && !showVideo
                           ? 'border-[#FF6B9E] ring-2 ring-[#FF6B9E]/30'
                           : 'border-[#F3E8FF] hover:border-[#FF6B9E]/50'
@@ -227,7 +227,7 @@ const ProductDetailPage = () => {
                   {hasVideo && (
                     <button
                       onClick={() => setShowVideo(true)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all relative ${
+                      className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all relative ${
                         showVideo
                           ? 'border-[#82D1B2] ring-2 ring-[#82D1B2]/30'
                           : 'border-[#F3E8FF] hover:border-[#82D1B2]/50'
@@ -239,8 +239,8 @@ const ProductDetailPage = () => {
                         muted
                       />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <div className="w-8 h-8 rounded-full bg-[#82D1B2] flex items-center justify-center">
-                          <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#82D1B2] flex items-center justify-center">
+                          <Play className="w-3 h-3 sm:w-4 sm:h-4 text-white fill-white ml-0.5" />
                         </div>
                       </div>
                     </button>
@@ -250,7 +250,7 @@ const ProductDetailPage = () => {
               
               {/* Image Counter */}
               {images.length > 1 && (
-                <p className="text-center text-sm text-gray-500">
+                <p className="text-center text-xs sm:text-sm text-gray-500">
                   {showVideo ? 'Video' : `Image ${selectedImageIndex + 1} of ${images.length}`}
                   {hasVideo && !showVideo && ' • Video available'}
                 </p>
@@ -262,7 +262,7 @@ const ProductDetailPage = () => {
               {/* Category Badge */}
               <Link
                 to={`/products/${product.category}`}
-                className="inline-block self-start px-4 py-2 bg-[#F3E8FF] text-[#FF6B9E] text-sm font-semibold rounded-full mb-4 capitalize hover:bg-[#FF6B9E] hover:text-white transition-colors"
+                className="inline-block self-start px-3 py-1.5 sm:px-4 sm:py-2 bg-[#F3E8FF] text-[#FF6B9E] text-xs sm:text-sm font-semibold rounded-full mb-3 sm:mb-4 capitalize hover:bg-[#FF6B9E] hover:text-white transition-colors"
                 data-testid="product-detail-category"
               >
                 {product.category.replace('-', ' ')}
@@ -270,7 +270,7 @@ const ProductDetailPage = () => {
 
               {/* Title */}
               <h1
-                className="text-3xl sm:text-4xl font-bold text-[#2D283E] mb-4"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#2D283E] mb-3 sm:mb-4"
                 style={{ fontFamily: 'Fredoka, sans-serif' }}
                 data-testid="product-detail-name"
               >
@@ -278,50 +278,50 @@ const ProductDetailPage = () => {
               </h1>
 
               {/* Price */}
-              <div className="mb-6" data-testid="product-detail-price">
+              <div className="mb-4 sm:mb-6" data-testid="product-detail-price">
                 {hasDiscount ? (
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl font-bold text-[#FF6B9E]">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <span className="text-2xl sm:text-3xl font-bold text-[#FF6B9E]">
                       {formatPrice(discountedPrice)}
                     </span>
-                    <span className="text-xl text-gray-400 line-through">
+                    <span className="text-base sm:text-xl text-gray-400 line-through">
                       {formatPrice(product.price)}
                     </span>
-                    <span className="px-3 py-1 bg-[#FFD166]/20 text-[#cc9900] rounded-full font-semibold text-sm">
+                    <span className="px-2 py-1 sm:px-3 bg-[#FFD166]/20 text-[#cc9900] rounded-full font-semibold text-xs sm:text-sm">
                       Save {formatPrice(product.price - discountedPrice)}
                     </span>
                   </div>
                 ) : (
-                  <span className="text-3xl font-bold text-[#FF6B9E]">
+                  <span className="text-2xl sm:text-3xl font-bold text-[#FF6B9E]">
                     {formatPrice(product.price)}
                   </span>
                 )}
               </div>
 
               {/* Description */}
-              <p className="text-gray-600 text-lg leading-relaxed mb-8" data-testid="product-detail-description">
+              <p className="text-gray-600 text-base sm:text-lg leading-relaxed mb-6 sm:mb-8" data-testid="product-detail-description">
                 {product.description}
               </p>
 
               {/* Features */}
-              <div className="space-y-3 mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#82D1B2]/20 flex items-center justify-center">
-                    <Check className="w-4 h-4 text-[#82D1B2]" />
+              <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#82D1B2]/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#82D1B2]" />
                   </div>
-                  <span className="text-[#2D283E]">100% Handmade with Love</span>
+                  <span className="text-sm sm:text-base text-[#2D283E]">100% Handmade with Love</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#82D1B2]/20 flex items-center justify-center">
-                    <Check className="w-4 h-4 text-[#82D1B2]" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#82D1B2]/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#82D1B2]" />
                   </div>
-                  <span className="text-[#2D283E]">Premium Quality Materials</span>
+                  <span className="text-sm sm:text-base text-[#2D283E]">Premium Quality Materials</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#82D1B2]/20 flex items-center justify-center">
-                    <Package className="w-4 h-4 text-[#82D1B2]" />
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#82D1B2]/20 flex items-center justify-center flex-shrink-0">
+                    <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#82D1B2]" />
                   </div>
-                  <span className="text-[#2D283E]">Carefully Packaged</span>
+                  <span className="text-sm sm:text-base text-[#2D283E]">Carefully Packaged</span>
                 </div>
                 {images.length > 1 && (
                   <div className="flex items-center gap-3">
@@ -343,12 +343,12 @@ const ProductDetailPage = () => {
 
               {/* CTA Buttons */}
               {product.in_stock ? (
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col gap-3">
                   <a
                     href={`https://wa.me/916388533973?text=Hi! I'm interested in ${encodeURIComponent(product.name)} (${formatPrice(discountedPrice)})`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="whatsapp-btn flex-1 justify-center text-lg"
+                    className="whatsapp-btn justify-center text-base sm:text-lg py-3"
                     data-testid="product-detail-whatsapp-btn"
                   >
                     <ShoppingBag className="w-5 h-5" />
@@ -358,7 +358,7 @@ const ProductDetailPage = () => {
                     href={`https://www.instagram.com/tp._loveco`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="instagram-btn flex-1 justify-center text-lg"
+                    className="instagram-btn justify-center text-base sm:text-lg py-3"
                     data-testid="product-detail-instagram-btn"
                   >
                     <Instagram className="w-5 h-5" />
@@ -366,13 +366,13 @@ const ProductDetailPage = () => {
                   </a>
                 </div>
               ) : (
-                <div className="bg-gray-100 rounded-xl p-6 text-center">
-                  <p className="text-gray-600 mb-4">This item is currently out of stock</p>
+                <div className="bg-gray-100 rounded-xl p-4 sm:p-6 text-center">
+                  <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">This item is currently out of stock</p>
                   <a
                     href={`https://wa.me/916388533973?text=Hi! I'm interested in ${encodeURIComponent(product.name)} but it's out of stock. Can you let me know when it's available?`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="whatsapp-btn inline-flex"
+                    className="whatsapp-btn inline-flex text-sm sm:text-base"
                     data-testid="product-detail-notify-btn"
                   >
                     <MessageCircle className="w-5 h-5" />
@@ -387,12 +387,12 @@ const ProductDetailPage = () => {
           {relatedProducts.length > 0 && (
             <section data-testid="related-products-section">
               <h2
-                className="text-2xl sm:text-3xl font-bold text-[#2D283E] mb-8"
+                className="text-xl sm:text-2xl md:text-3xl font-bold text-[#2D283E] mb-4 sm:mb-8"
                 style={{ fontFamily: 'Fredoka, sans-serif' }}
               >
                 You Might Also Like
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {relatedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
