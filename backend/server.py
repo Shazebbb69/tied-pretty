@@ -67,6 +67,7 @@ class ProductCreate(BaseModel):
     in_stock: bool = True
     discount_percentage: float = 0
     discount_active: bool = False
+    is_featured: bool = False
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -77,6 +78,7 @@ class ProductUpdate(BaseModel):
     in_stock: Optional[bool] = None
     discount_percentage: Optional[float] = None
     discount_active: Optional[bool] = None
+    is_featured: Optional[bool] = None
 
 class ProductResponse(BaseModel):
     id: str
@@ -89,6 +91,7 @@ class ProductResponse(BaseModel):
     created_at: str
     discount_percentage: float = 0
     discount_active: bool = False
+    is_featured: bool = False
 
 class CategoryResponse(BaseModel):
     id: str
@@ -197,6 +200,11 @@ async def get_me(request: Request):
     return user
 
 # ==================== PRODUCT ROUTES ====================
+
+@api_router.get("/products/featured", response_model=List[ProductResponse])
+async def get_featured_products():
+    products = await db.products.find({"is_featured": True}, {"_id": 0}).to_list(100)
+    return products
 
 @api_router.get("/products", response_model=List[ProductResponse])
 async def get_products(category: Optional[str] = None, search: Optional[str] = None):

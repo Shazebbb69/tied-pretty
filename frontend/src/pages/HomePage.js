@@ -13,17 +13,21 @@ const LOGO_URL = "https://customer-assets.emergentagent.com/job_craft-corner-23/
 const HomePage = () => {
   const [categories, setCategories] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [catRes, prodRes] = await Promise.all([
+        const [catRes, prodRes, featuredRes] = await Promise.all([
           axios.get(`${API_URL}/api/categories`),
-          axios.get(`${API_URL}/api/products`)
+          axios.get(`${API_URL}/api/products`),
+          axios.get(`${API_URL}/api/products/featured`)
         ]);
         setCategories(catRes.data);
-        setFeaturedProducts(prodRes.data.slice(0, 4));
+        setAllProducts(prodRes.data);
+        // Use featured products if available, otherwise show first 4 products
+        setFeaturedProducts(featuredRes.data.length > 0 ? featuredRes.data : prodRes.data.slice(0, 4));
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -163,13 +167,16 @@ const HomePage = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-12">
               <div>
-                <h2 
-                  className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#2D283E] mb-2"
-                  style={{ fontFamily: 'Fredoka, sans-serif' }}
-                >
-                  Featured Products
-                </h2>
-                <p className="text-gray-600">Our most loved handmade creations</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <Star className="w-6 h-6 text-[#FFD166] fill-[#FFD166]" />
+                  <h2 
+                    className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#2D283E]"
+                    style={{ fontFamily: 'Fredoka, sans-serif' }}
+                  >
+                    Featured Products
+                  </h2>
+                </div>
+                <p className="text-gray-600">Special picks just for you</p>
               </div>
               <Link
                 to="/products"

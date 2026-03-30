@@ -18,6 +18,8 @@ import {
   Image as ImageIcon,
   Percent,
   X,
+  Star,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -730,6 +732,177 @@ const ProductsManagement = () => {
   );
 };
 
+// Featured Products Management
+const FeaturedProductsManagement = () => {
+  const [products, setProducts] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      const prodRes = await axios.get(`${API_URL}/api/products`);
+      setProducts(prodRes.data);
+      setFeaturedProducts(prodRes.data.filter(p => p.is_featured));
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const toggleFeatured = async (product) => {
+    try {
+      await axios.put(`${API_URL}/api/products/${product.id}`, {
+        is_featured: !product.is_featured,
+      }, {
+        withCredentials: true,
+      });
+      toast.success(product.is_featured ? 'Removed from featured' : 'Added to featured');
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to update featured status');
+    }
+  };
+
+  const nonFeaturedProducts = products.filter(p => !p.is_featured);
+
+  return (
+    <div data-testid="admin-featured-management">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-[#2D283E] flex items-center gap-2" style={{ fontFamily: 'Fredoka, sans-serif' }}>
+          <Sparkles className="w-7 h-7 text-[#FFD166]" />
+          Featured Products
+        </h1>
+        <p className="text-gray-500 mt-1">Showcase special products on your homepage for special occasions</p>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#FF6B9E] border-t-transparent mx-auto"></div>
+        </div>
+      ) : (
+        <>
+          {/* Current Featured Products */}
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-[#2D283E] mb-4 flex items-center gap-2" style={{ fontFamily: 'Fredoka, sans-serif' }}>
+              <Star className="w-5 h-5 text-[#FFD166] fill-[#FFD166]" />
+              Currently Featured ({featuredProducts.length})
+            </h2>
+            
+            {featuredProducts.length === 0 ? (
+              <div className="bg-[#FFD166]/10 border-2 border-dashed border-[#FFD166] rounded-2xl p-8 text-center">
+                <Sparkles className="w-12 h-12 text-[#FFD166] mx-auto mb-3" />
+                <p className="text-[#cc9900] font-medium">No featured products yet</p>
+                <p className="text-gray-500 text-sm mt-1">Add products from the list below to feature them on your homepage</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {featuredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-white rounded-2xl border-2 border-[#FFD166] overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                  >
+                    <div className="relative">
+                      <img
+                        src={product.image_url.startsWith('/') ? `${API_URL}${product.image_url}` : product.image_url}
+                        alt={product.name}
+                        className="w-full h-40 object-cover"
+                      />
+                      <div className="absolute top-2 right-2 bg-[#FFD166] text-white p-1.5 rounded-full">
+                        <Star className="w-4 h-4 fill-white" />
+                      </div>
+                      {product.discount_active && product.discount_percentage > 0 && (
+                        <div className="absolute top-2 left-2 bg-gradient-to-r from-[#FF6B9E] to-[#ff4d8a] text-white text-xs font-bold px-2 py-1 rounded-full">
+                          {product.discount_percentage}% OFF
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-[#2D283E] truncate">{product.name}</h3>
+                      <p className="text-sm text-gray-500 capitalize">{product.category.replace('-', ' ')}</p>
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="font-bold text-[#FF6B9E]">₹{product.price}</span>
+                        <button
+                          onClick={() => toggleFeatured(product)}
+                          className="px-3 py-1.5 bg-red-100 text-red-600 rounded-full text-sm font-medium hover:bg-red-200 transition-colors flex items-center gap-1"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Available Products to Feature */}
+          <div>
+            <h2 className="text-lg font-semibold text-[#2D283E] mb-4 flex items-center gap-2" style={{ fontFamily: 'Fredoka, sans-serif' }}>
+              <Package className="w-5 h-5 text-[#82D1B2]" />
+              Available Products ({nonFeaturedProducts.length})
+            </h2>
+            
+            {nonFeaturedProducts.length === 0 ? (
+              <div className="bg-gray-100 rounded-2xl p-8 text-center">
+                <p className="text-gray-500">All products are already featured!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {nonFeaturedProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-white rounded-2xl border-2 border-[#F3E8FF] overflow-hidden hover:border-[#FFD166] transition-colors"
+                  >
+                    <div className="relative">
+                      <img
+                        src={product.image_url.startsWith('/') ? `${API_URL}${product.image_url}` : product.image_url}
+                        alt={product.name}
+                        className="w-full h-40 object-cover"
+                      />
+                      {!product.in_stock && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <span className="bg-white text-[#2D283E] px-3 py-1 rounded-full text-sm font-medium">
+                            Out of Stock
+                          </span>
+                        </div>
+                      )}
+                      {product.discount_active && product.discount_percentage > 0 && (
+                        <div className="absolute top-2 left-2 bg-gradient-to-r from-[#FF6B9E] to-[#ff4d8a] text-white text-xs font-bold px-2 py-1 rounded-full">
+                          {product.discount_percentage}% OFF
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-[#2D283E] truncate">{product.name}</h3>
+                      <p className="text-sm text-gray-500 capitalize">{product.category.replace('-', ' ')}</p>
+                      <div className="flex items-center justify-between mt-3">
+                        <span className="font-bold text-[#FF6B9E]">₹{product.price}</span>
+                        <button
+                          onClick={() => toggleFeatured(product)}
+                          className="px-3 py-1.5 bg-gradient-to-r from-[#FFD166] to-[#FFA500] text-white rounded-full text-sm font-medium hover:shadow-md transition-all flex items-center gap-1"
+                        >
+                          <Star className="w-3.5 h-3.5" />
+                          Feature
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 // Main Admin Dashboard Component
 const AdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -740,6 +913,7 @@ const AdminDashboard = () => {
   const navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'Products', path: '/admin/products', icon: Package },
+    { name: 'Featured', path: '/admin/featured', icon: Star },
   ];
 
   const handleLogout = async () => {
@@ -847,6 +1021,7 @@ const AdminDashboard = () => {
           <Routes>
             <Route path="dashboard" element={<DashboardOverview />} />
             <Route path="products" element={<ProductsManagement />} />
+            <Route path="featured" element={<FeaturedProductsManagement />} />
             <Route path="*" element={<DashboardOverview />} />
           </Routes>
         </main>
