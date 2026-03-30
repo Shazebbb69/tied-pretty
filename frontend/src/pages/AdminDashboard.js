@@ -163,21 +163,23 @@ const DashboardOverview = () => {
                   <TableCell>₹{product.price}</TableCell>
                   <TableCell>
                     {product.discount_active && product.discount_percentage > 0 ? (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-[#FFD166]/20 text-[#FFD166]">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-[#FFD166] to-[#FFA500] text-white shadow-sm">
+                        <Percent className="w-3 h-3" />
                         {product.discount_percentage}% OFF
                       </span>
                     ) : (
-                      <span className="text-gray-400">-</span>
+                      <span className="text-gray-400 text-sm">-</span>
                     )}
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm ${
                         product.in_stock
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
+                          ? 'bg-gradient-to-r from-[#82D1B2] to-[#4CAF50] text-white'
+                          : 'bg-gradient-to-r from-[#FF6B6B] to-[#FF4757] text-white'
                       }`}
                     >
+                      <span className={`w-1.5 h-1.5 rounded-full ${product.in_stock ? 'bg-white animate-pulse' : 'bg-white/60'}`}></span>
                       {product.in_stock ? 'In Stock' : 'Out of Stock'}
                     </span>
                   </TableCell>
@@ -443,43 +445,52 @@ const ProductsManagement = () => {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {product.discount_percentage > 0 ? (
-                          <>
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          <button
+                            onClick={() => toggleDiscount(product)}
+                            className={`group relative flex items-center gap-2 px-3 py-1.5 rounded-full font-medium text-sm transition-all duration-300 ${
                               product.discount_active 
-                                ? 'bg-[#FFD166]/20 text-[#cc9900]' 
-                                : 'bg-gray-100 text-gray-500'
+                                ? 'bg-gradient-to-r from-[#FFD166] to-[#FFA500] text-white shadow-md hover:shadow-lg hover:scale-105' 
+                                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                            }`}
+                            data-testid={`discount-toggle-${product.id}`}
+                          >
+                            <Percent className="w-3.5 h-3.5" />
+                            <span>{product.discount_percentage}% OFF</span>
+                            <span className={`ml-1 w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+                              product.discount_active 
+                                ? 'bg-white/30' 
+                                : 'bg-gray-300'
                             }`}>
-                              {product.discount_percentage}% OFF
+                              {product.discount_active ? '✓' : '○'}
                             </span>
-                            <Switch
-                              checked={product.discount_active}
-                              onCheckedChange={() => toggleDiscount(product)}
-                              className="data-[state=checked]:bg-[#FFD166]"
-                            />
-                          </>
+                          </button>
                         ) : (
-                          <span className="text-gray-400 text-sm">No discount</span>
+                          <span className="text-gray-400 text-sm italic">No discount set</span>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            product.in_stock
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}
-                        >
-                          {product.in_stock ? 'In Stock' : 'Out of Stock'}
-                        </span>
-                        <Switch
-                          checked={product.in_stock}
-                          onCheckedChange={() => toggleStock(product)}
-                          className="data-[state=checked]:bg-green-500"
-                          data-testid={`stock-toggle-${product.id}`}
-                        />
-                      </div>
+                      <button
+                        onClick={() => toggleStock(product)}
+                        className={`group relative flex items-center gap-2 px-3 py-1.5 rounded-full font-medium text-sm transition-all duration-300 ${
+                          product.in_stock
+                            ? 'bg-gradient-to-r from-[#82D1B2] to-[#4CAF50] text-white shadow-md hover:shadow-lg hover:scale-105'
+                            : 'bg-gradient-to-r from-[#FF6B6B] to-[#FF4757] text-white shadow-md hover:shadow-lg hover:scale-105'
+                        }`}
+                        data-testid={`stock-toggle-${product.id}`}
+                      >
+                        {product.in_stock ? (
+                          <>
+                            <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                            <span>In Stock</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="w-2 h-2 rounded-full bg-white/60"></span>
+                            <span>Out of Stock</span>
+                          </>
+                        )}
+                      </button>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
