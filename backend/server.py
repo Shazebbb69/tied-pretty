@@ -63,8 +63,10 @@ class ProductCreate(BaseModel):
     description: str
     price: float
     category: str
-    image_url: str
+    image_url: str = ""
     in_stock: bool = True
+    discount_percentage: float = 0
+    discount_active: bool = False
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -73,6 +75,8 @@ class ProductUpdate(BaseModel):
     category: Optional[str] = None
     image_url: Optional[str] = None
     in_stock: Optional[bool] = None
+    discount_percentage: Optional[float] = None
+    discount_active: Optional[bool] = None
 
 class ProductResponse(BaseModel):
     id: str
@@ -83,6 +87,8 @@ class ProductResponse(BaseModel):
     image_url: str
     in_stock: bool
     created_at: str
+    discount_percentage: float = 0
+    discount_active: bool = False
 
 class CategoryResponse(BaseModel):
     id: str
@@ -244,6 +250,35 @@ async def delete_product(product_id: str, request: Request):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Product not found")
     return {"message": "Product deleted successfully"}
+
+# ==================== IMAGE UPLOAD ROUTES ====================
+
+@api_router.post("/upload")
+async def upload_image(file: UploadFile = File(...), request: Request = None):
+    await require_admin(request)
+    
+    # Validate file type
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.")
+    
+    # Create uploads directory if it doesn't exist
+    upload_dir = Path("/app/frontend/public/uploads")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+    unique_filename = f"{uuid.uuid4()}.{file_ext}"
+    file_path = upload_dir / unique_filename
+    
+    # Save file
+    content = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(content)
+    
+    # Return the public URL
+    image_url = f"/uploads/{unique_filename}"
+    return {"url": image_url, "filename": unique_filename}
 
 # ==================== CATEGORY ROUTES ====================
 

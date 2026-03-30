@@ -4,7 +4,7 @@ import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
-import { ArrowLeft, ShoppingBag, MessageCircle, Instagram, Check, Package } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, MessageCircle, Instagram, Check, Package, Percent } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -43,6 +43,11 @@ const ProductDetailPage = () => {
     }).format(price);
   };
 
+  const getImageUrl = (url) => {
+    if (!url) return 'https://via.placeholder.com/500';
+    return url.startsWith('/') ? `${API_URL}${url}` : url;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -74,6 +79,11 @@ const ProductDetailPage = () => {
     );
   }
 
+  const hasDiscount = product.discount_active && product.discount_percentage > 0;
+  const discountedPrice = hasDiscount 
+    ? Math.round(product.price * (1 - product.discount_percentage / 100))
+    : product.price;
+
   return (
     <div className="min-h-screen flex flex-col" data-testid="product-detail-page">
       <Header />
@@ -96,12 +106,21 @@ const ProductDetailPage = () => {
             <div className="relative">
               <div className="rounded-[2rem] overflow-hidden border-2 border-[#F3E8FF] shadow-lg">
                 <img
-                  src={product.image_url}
+                  src={getImageUrl(product.image_url)}
                   alt={product.name}
                   className="w-full aspect-square object-cover"
                   data-testid="product-detail-image"
                 />
               </div>
+              
+              {/* Discount Badge */}
+              {hasDiscount && (
+                <div className="absolute top-4 left-4 bg-[#FFD166] text-[#2D283E] px-4 py-2 rounded-full font-bold text-lg shadow-lg flex items-center gap-2">
+                  <Percent className="w-5 h-5" />
+                  {product.discount_percentage}% OFF
+                </div>
+              )}
+              
               {!product.in_stock && (
                 <div className="absolute top-4 right-4 bg-[#FF4D4F] text-white px-4 py-2 rounded-full font-semibold">
                   Out of Stock
@@ -130,8 +149,24 @@ const ProductDetailPage = () => {
               </h1>
 
               {/* Price */}
-              <div className="text-3xl font-bold text-[#FF6B9E] mb-6" data-testid="product-detail-price">
-                {formatPrice(product.price)}
+              <div className="mb-6" data-testid="product-detail-price">
+                {hasDiscount ? (
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl font-bold text-[#FF6B9E]">
+                      {formatPrice(discountedPrice)}
+                    </span>
+                    <span className="text-xl text-gray-400 line-through">
+                      {formatPrice(product.price)}
+                    </span>
+                    <span className="px-3 py-1 bg-[#FFD166]/20 text-[#cc9900] rounded-full font-semibold text-sm">
+                      Save {formatPrice(product.price - discountedPrice)}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-3xl font-bold text-[#FF6B9E]">
+                    {formatPrice(product.price)}
+                  </span>
+                )}
               </div>
 
               {/* Description */}
@@ -165,7 +200,7 @@ const ProductDetailPage = () => {
               {product.in_stock ? (
                 <div className="flex flex-col sm:flex-row gap-4">
                   <a
-                    href={`https://wa.me/916388533973?text=Hi! I'm interested in ${encodeURIComponent(product.name)} (${formatPrice(product.price)})`}
+                    href={`https://wa.me/916388533973?text=Hi! I'm interested in ${encodeURIComponent(product.name)} (${formatPrice(discountedPrice)})`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="whatsapp-btn flex-1 justify-center text-lg"

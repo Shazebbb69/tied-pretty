@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag } from 'lucide-react';
 
+const API_URL = process.env.REACT_APP_BACKEND_URL;
+
 const ProductCard = ({ product }) => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', {
@@ -11,17 +13,35 @@ const ProductCard = ({ product }) => {
     }).format(price);
   };
 
+  const getImageUrl = (url) => {
+    if (!url) return 'https://via.placeholder.com/300';
+    return url.startsWith('/') ? `${API_URL}${url}` : url;
+  };
+
+  const hasDiscount = product.discount_active && product.discount_percentage > 0;
+  const discountedPrice = hasDiscount 
+    ? Math.round(product.price * (1 - product.discount_percentage / 100))
+    : product.price;
+
   return (
     <div className="product-card group" data-testid={`product-card-${product.id}`}>
       <Link to={`/product/${product.id}`} className="block">
         {/* Image Container */}
         <div className="relative overflow-hidden">
           <img
-            src={product.image_url}
+            src={getImageUrl(product.image_url)}
             alt={product.name}
             className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
           />
+          
+          {/* Discount Badge */}
+          {hasDiscount && (
+            <div className="absolute top-3 left-3 bg-[#FFD166] text-[#2D283E] px-3 py-1 rounded-full font-bold text-sm shadow-md">
+              {product.discount_percentage}% OFF
+            </div>
+          )}
+          
           {!product.in_stock && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <span className="bg-white text-[#2D283E] px-4 py-2 rounded-full font-semibold text-sm">
@@ -45,13 +65,26 @@ const ProductCard = ({ product }) => {
 
           {/* Price */}
           <div className="flex items-center justify-between">
-            <span className="text-xl font-bold text-[#FF6B9E]" data-testid={`product-price-${product.id}`}>
-              {formatPrice(product.price)}
-            </span>
+            <div>
+              {hasDiscount ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-bold text-[#FF6B9E]" data-testid={`product-price-${product.id}`}>
+                    {formatPrice(discountedPrice)}
+                  </span>
+                  <span className="text-sm text-gray-400 line-through">
+                    {formatPrice(product.price)}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-xl font-bold text-[#FF6B9E]" data-testid={`product-price-${product.id}`}>
+                  {formatPrice(product.price)}
+                </span>
+              )}
+            </div>
             
             {product.in_stock && (
               <a
-                href={`https://wa.me/916388533973?text=Hi! I'm interested in ${encodeURIComponent(product.name)} (${formatPrice(product.price)})`}
+                href={`https://wa.me/916388533973?text=Hi! I'm interested in ${encodeURIComponent(product.name)} (${formatPrice(discountedPrice)})`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
