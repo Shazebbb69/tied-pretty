@@ -1,34 +1,199 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* App specific styles */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.main-content {
+  flex: 1;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+/* Hero section */
+.hero-gradient {
+  background: linear-gradient(135deg, rgba(255, 107, 158, 0.1) 0%, rgba(255, 209, 102, 0.1) 100%);
 }
 
-.App-link {
-    color: #61dafb;
+/* Product card */
+.product-card {
+  background: white;
+  border: 2px solid #F3E8FF;
+  border-radius: 2rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 8px 8px 0px #FFD166;
+}
+
+.product-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+/* Category card */
+.category-card {
+  position: relative;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  border: 2px solid #F3E8FF;
+  transition: all 0.3s ease;
+}
+
+.category-card:hover {
+  transform: scale(1.02);
+  box-shadow: 6px 6px 0px #FF6B9E;
+}
+
+.category-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.category-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(45, 40, 62, 0.8) 0%, transparent 60%);
+  display: flex;
+  align-items: flex-end;
+  padding: 1.5rem;
+}
+
+/* Header styles */
+.header-blur {
+  backdrop-filter: blur(12px);
+  background: rgba(255, 253, 247, 0.8);
+}
+
+/* WhatsApp button */
+.whatsapp-btn {
+  background: #25D366;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.whatsapp-btn:hover {
+  background: #1da851;
+  transform: scale(1.05);
+}
+
+/* Instagram button */
+.instagram-btn {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.instagram-btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* Admin panel */
+.admin-sidebar {
+  background: white;
+  border-right: 2px solid #F3E8FF;
+  min-height: 100vh;
+}
+
+.admin-nav-item {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.admin-nav-item:hover,
+.admin-nav-item.active {
+  background: #F3E8FF;
+  color: #FF6B9E;
+}
+
+/* Form styles */
+.form-input {
+  border: 2px solid #F3E8FF;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #FF6B9E;
+  box-shadow: 0 0 0 3px rgba(255, 107, 158, 0.1);
+}
+
+/* Loading animation */
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Bento grid */
+.bento-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 768px) {
+  .bento-grid {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 200px);
+    gap: 1.5rem;
+  }
+  
+  .bento-item-1 {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+  
+  .bento-item-2 {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+  
+  .bento-item-3 {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+  
+  .bento-item-4 {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+  
+  .bento-item-5 {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+}
+
+@media (min-width: 1024px) {
+  .bento-grid {
+    grid-template-rows: repeat(2, 220px);
+  }
 }
