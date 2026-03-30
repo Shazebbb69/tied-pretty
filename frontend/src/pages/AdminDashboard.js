@@ -363,6 +363,20 @@ const ProductsManagement = () => {
     }
   };
 
+  const toggleStock = async (product) => {
+    try {
+      await axios.put(`${API_URL}/api/products/${product.id}`, {
+        in_stock: !product.in_stock,
+      }, {
+        withCredentials: true,
+      });
+      toast.success(product.in_stock ? 'Marked as Out of Stock' : 'Marked as In Stock');
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to update stock status');
+    }
+  };
+
   return (
     <div data-testid="admin-products-management">
       <div className="flex items-center justify-between mb-6">
@@ -449,15 +463,23 @@ const ProductsManagement = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          product.in_stock
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}
-                      >
-                        {product.in_stock ? 'In Stock' : 'Out of Stock'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            product.in_stock
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          {product.in_stock ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                        <Switch
+                          checked={product.in_stock}
+                          onCheckedChange={() => toggleStock(product)}
+                          className="data-[state=checked]:bg-green-500"
+                          data-testid={`stock-toggle-${product.id}`}
+                        />
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
