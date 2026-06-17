@@ -55,7 +55,7 @@ const ProductCard = ({ product }) => {
         <div className="p-2 sm:p-4">
           {/* Category Badge */}
           <span className="inline-block px-2 py-0.5 sm:px-3 sm:py-1 bg-[#F3E8FF] text-[#FF6B9E] text-[10px] sm:text-xs font-semibold rounded-full mb-1 sm:mb-2 capitalize">
-            {product.category.replace('-', ' ')}
+            {product.category}
           </span>
 
           {/* Title */}
@@ -83,17 +83,23 @@ const ProductCard = ({ product }) => {
             </div>
             
             {product.in_stock && (
-              <a
-                href={`https://wa.me/916388533973?text=Hi! I'm interested in ${encodeURIComponent(product.name)} (${formatPrice(discountedPrice)})`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="p-1.5 sm:p-2 bg-[#25D366] text-white rounded-full hover:scale-110 transition-transform flex-shrink-0"
-                data-testid={`product-order-btn-${product.id}`}
-              >
-                <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
-              </a>
-            )}
+  <button
+    type="button"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      window.open(
+        `https://wa.me/916388533973?text=Hi! I'm interested in ${encodeURIComponent(product.name)} (${formatPrice(discountedPrice)})`,
+        "_blank"
+      );
+    }}
+    className="p-1.5 sm:p-2 bg-[#25D366] text-white rounded-full hover:scale-110 transition-transform flex-shrink-0"
+    data-testid={`product-order-btn-${product.id}`}
+  >
+    <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
+  </button>
+)}
           </div>
         </div>
       </Link>

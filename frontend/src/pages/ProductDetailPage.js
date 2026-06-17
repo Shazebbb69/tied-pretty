@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import { supabase } from '../lib/supabase';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
 import { ArrowLeft, ShoppingBag, MessageCircle, Instagram, Check, Package, Percent, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -20,16 +19,28 @@ const ProductDetailPage = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/api/products/${id}`);
-        setProduct(response.data);
-        setSelectedImageIndex(0);
-        setShowVideo(false);
+        const { data: productData, error: productError } = await supabase
+  .from('products')
+  .select('*')
+  .eq('id', id)
+  .single();
 
-        // Fetch related products from same category
-        const relatedRes = await axios.get(`${API_URL}/api/products`, {
-          params: { category: response.data.category },
-        });
-        setRelatedProducts(relatedRes.data.filter((p) => p.id !== id).slice(0, 4));
+if (productError) throw productError;
+
+setProduct(productData);
+
+const { data: relatedData, error: relatedError } = await supabase
+  .from('products')
+  .select('*')
+  .eq('category_id', productData.category_id);
+
+if (relatedError) throw relatedError;
+
+setRelatedProducts(
+  (relatedData || [])
+    .filter((p) => p.id !== id)
+    .slice(0, 4)
+);
       } catch (error) {
         console.error('Error fetching product:', error);
       } finally {
@@ -260,13 +271,12 @@ const ProductDetailPage = () => {
             {/* Details */}
             <div className="flex flex-col">
               {/* Category Badge */}
-              <Link
-                to={`/products/${product.category}`}
-                className="inline-block self-start px-3 py-1.5 sm:px-4 sm:py-2 bg-[#F3E8FF] text-[#FF6B9E] text-xs sm:text-sm font-semibold rounded-full mb-3 sm:mb-4 capitalize hover:bg-[#FF6B9E] hover:text-white transition-colors"
-                data-testid="product-detail-category"
-              >
-                {product.category.replace('-', ' ')}
-              </Link>
+              <div
+  className="inline-block self-start px-3 py-1.5 sm:px-4 sm:py-2 bg-[#F3E8FF] text-[#FF6B9E] text-xs sm:text-sm font-semibold rounded-full mb-3 sm:mb-4"
+  data-testid="product-detail-category"
+>
+  Category
+</div>
 
               {/* Title */}
               <h1

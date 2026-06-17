@@ -1,7 +1,7 @@
+import { supabase } from "../lib/supabase";
 import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
 import { toast } from 'sonner';
 import {
   LayoutDashboard,
@@ -50,38 +50,57 @@ import {
 } from '../components/ui/table';
 import { Switch } from '../components/ui/switch';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
 const LOGO_URL = "https://customer-assets.emergentagent.com/job_craft-corner-23/artifacts/zjr1h6m2_Screenshot_2026-03-30-21-43-48-964_com.instagram.android-edit.jpg";
+
+// Helper: look up category name by id
+const getCategoryName = (categoryId, categories) => {
+  const cat = categories.find((c) => c.id === categoryId);
+  return cat ? cat.name : '—';
+};
 
 // Dashboard Overview
 const DashboardOverview = () => {
   const [stats, setStats] = useState({ products: 0, categories: 0, discounted: 0 });
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [prodRes, catRes] = await Promise.all([
-          axios.get(`${API_URL}/api/products`),
-          axios.get(`${API_URL}/api/categories`),
-        ]);
-        setProducts(prodRes.data);
-        const discountedCount = prodRes.data.filter(p => p.discount_active && p.discount_percentage > 0).length;
+        const { data: productsData, error: productsError } = await supabase
+          .from("products")
+          .select("*");
+
+        const { data: categoriesData, error: categoriesError } = await supabase
+          .from("categories")
+          .select("*");
+
+        if (productsError) throw productsError;
+        if (categoriesError) throw categoriesError;
+
+        setProducts(productsData || []);
+        setCategories(categoriesData || []);
+
+        const discountedCount = (productsData || []).filter(
+          (p) => p.discount_active && p.discount_percentage > 0
+        ).length;
+
         setStats({
-          products: prodRes.data.length,
-          categories: catRes.data.length,
+          products: productsData?.length || 0,
+          categories: categoriesData?.length || 0,
           discounted: discountedCount,
         });
       } catch (error) {
-        console.error('Error fetching stats:', error);
+        console.error("Error fetching dashboard stats:", error);
       }
     };
+
     fetchData();
   }, []);
 
   return (
     <div data-testid="admin-dashboard-overview">
-      <h1 className="text-2xl font-bold text-[#2D283E] mb-6" style={{ fontFamily: 'Fredoka, sans-serif' }}>
+      <h1 className="text-2xl font-bold text-[#f5f5f6] mb-6" style={{ fontFamily: 'Fredoka, sans-serif' }}>
         Dashboard
       </h1>
 
@@ -89,7 +108,7 @@ const DashboardOverview = () => {
       <div className="grid sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-white rounded-2xl p-6 border-2 border-[#F3E8FF]">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[#FF6B9E]/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-[#FF6B9E]" />
             </div>
             <div>
@@ -154,14 +173,16 @@ const DashboardOverview = () => {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <img
-                        src={product.image_url.startsWith('/') ? `${API_URL}${product.image_url}` : product.image_url}
+                        src={product.image_url}
                         alt={product.name}
                         className="w-10 h-10 rounded-lg object-cover"
                       />
                       <span className="font-medium">{product.name}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="capitalize">{product.category.replace('-', ' ')}</TableCell>
+                  <TableCell className="capitalize">
+                    {getCategoryName(product.category_id, categories)}
+                  </TableCell>
                   <TableCell>₹{product.price}</TableCell>
                   <TableCell>
                     {product.discount_active && product.discount_percentage > 0 ? (
@@ -204,19 +225,15 @@ const ProductsManagement = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [imagePreviews, setImagePreviews] = useState([]);
-  const [videoPreview, setVideoPreview] = useState('');
   const fileInputRef = useRef(null);
-  const videoInputRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
-    category: '',
+    category_id: '',
     image_url: '',
     images: [],
-    video_url: '',
     in_stock: true,
     discount_percentage: '0',
     discount_active: false,
@@ -224,14 +241,21 @@ const ProductsManagement = () => {
 
   const fetchData = async () => {
     try {
-      const [prodRes, catRes] = await Promise.all([
-        axios.get(`${API_URL}/api/products`),
-        axios.get(`${API_URL}/api/categories`),
-      ]);
-      setProducts(prodRes.data);
-      setCategories(catRes.data);
+      const { data: productsData, error: productsError } = await supabase
+        .from("products")
+        .select("*");
+
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from("categories")
+        .select("*");
+
+      if (productsError) throw productsError;
+      if (categoriesError) throw categoriesError;
+
+      setProducts(productsData || []);
+      setCategories(categoriesData || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
@@ -247,40 +271,39 @@ const ProductsManagement = () => {
       name: '',
       description: '',
       price: '',
-      category: '',
+      category_id: '',
       image_url: '',
       images: [],
-      video_url: '',
       in_stock: true,
       discount_percentage: '0',
       discount_active: false,
     });
     setImagePreviews([]);
-    setVideoPreview('');
     setIsDialogOpen(true);
   };
 
   const openEditDialog = (product) => {
     setSelectedProduct(product);
-    const allImages = product.images && product.images.length > 0 
-      ? product.images 
-      : (product.image_url ? [product.image_url] : []);
-    
+    const allImages =
+      product.images && product.images.length > 0
+        ? product.images
+        : product.image_url
+        ? [product.image_url]
+        : [];
+
     setFormData({
       name: product.name,
       description: product.description,
       price: product.price.toString(),
-      category: product.category,
-      image_url: product.image_url || '',
+      category_id: product.category_id || "",
+      image_url: product.image_url || "",
       images: allImages,
-      video_url: product.video_url || '',
       in_stock: product.in_stock,
       discount_percentage: (product.discount_percentage || 0).toString(),
       discount_active: product.discount_active || false,
     });
-    
-    setImagePreviews(allImages.map(img => img.startsWith('/') ? `${API_URL}${img}` : img));
-    setVideoPreview(product.video_url ? (product.video_url.startsWith('/') ? `${API_URL}${product.video_url}` : product.video_url) : '');
+
+    setImagePreviews(allImages);
     setIsDialogOpen(true);
   };
 
@@ -291,87 +314,44 @@ const ProductsManagement = () => {
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files);
-    if (files.length === 0) return;
+    if (!files.length) return;
 
     setUploading(true);
-    
     try {
       for (const file of files) {
-        // Preview
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImagePreviews(prev => [...prev, reader.result]);
-        };
-        reader.readAsDataURL(file);
+        const fileName = `${Date.now()}-${file.name}`;
 
-        // Upload
-        const uploadFormData = new FormData();
-        uploadFormData.append('file', file);
+        const { error } = await supabase.storage
+          .from("product-images")
+          .upload(fileName, file);
 
-        const response = await axios.post(`${API_URL}/api/upload`, uploadFormData, {
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        if (error) throw error;
 
-        setFormData(prev => {
-          const newImages = [...prev.images, response.data.url];
-          return {
-            ...prev,
-            images: newImages,
-            image_url: prev.image_url || response.data.url, // Set first image as main
-          };
-        });
+        const { data } = supabase.storage
+          .from("product-images")
+          .getPublicUrl(fileName);
+
+        const imageUrl = data.publicUrl;
+
+        setImagePreviews((prev) => [...prev, imageUrl]);
+        setFormData((prev) => ({
+          ...prev,
+          images: [...prev.images, imageUrl],
+          image_url: prev.image_url || imageUrl,
+        }));
       }
-      toast.success(`${files.length} image(s) uploaded successfully`);
+      toast.success("Images uploaded");
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to upload image');
+      console.error("Image upload error:", error);
+      toast.error(error?.message || JSON.stringify(error));
     } finally {
       setUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
-
-  const handleVideoUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setUploadingVideo(true);
-    
-    try {
-      // Preview
-      const videoUrl = URL.createObjectURL(file);
-      setVideoPreview(videoUrl);
-
-      // Upload
-      const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
-
-      const response = await axios.post(`${API_URL}/api/upload/video`, uploadFormData, {
-        withCredentials: true,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      setFormData(prev => ({
-        ...prev,
-        video_url: response.data.url,
-      }));
-      toast.success('Video uploaded successfully');
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to upload video');
-      setVideoPreview('');
-    } finally {
-      setUploadingVideo(false);
-      if (videoInputRef.current) videoInputRef.current.value = '';
     }
   };
 
   const removeImage = (index) => {
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
-    setFormData(prev => {
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+    setFormData((prev) => {
       const newImages = prev.images.filter((_, i) => i !== index);
       return {
         ...prev,
@@ -381,13 +361,8 @@ const ProductsManagement = () => {
     });
   };
 
-  const removeVideo = () => {
-    setVideoPreview('');
-    setFormData(prev => ({ ...prev, video_url: '' }));
-  };
-
   const setMainImage = (index) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       image_url: prev.images[index],
     }));
@@ -396,58 +371,62 @@ const ProductsManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.image_url && formData.images.length === 0) {
-      toast.error('Please upload at least one product image');
-      return;
-    }
-
     try {
       const payload = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
         price: parseFloat(formData.price),
+        category_id: formData.category_id,
+        image_url: formData.image_url,
+        in_stock: formData.in_stock,
         discount_percentage: parseFloat(formData.discount_percentage) || 0,
-        image_url: formData.image_url || formData.images[0] || '',
+        discount_active: formData.discount_active,
       };
 
       if (selectedProduct) {
-        await axios.put(`${API_URL}/api/products/${selectedProduct.id}`, payload, {
-          withCredentials: true,
-        });
-        toast.success('Product updated successfully');
+        const { error } = await supabase
+          .from("products")
+          .update(payload)
+          .eq("id", selectedProduct.id);
+        if (error) throw error;
       } else {
-        await axios.post(`${API_URL}/api/products`, payload, {
-          withCredentials: true,
-        });
-        toast.success('Product created successfully');
+        const { error } = await supabase
+          .from("products")
+          .insert([payload]);
+        if (error) throw error;
       }
+
+      toast.success("Saved");
       setIsDialogOpen(false);
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to save product');
+      console.error("Save error:", error);
+      toast.error(error?.message || JSON.stringify(error));
     }
   };
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`${API_URL}/api/products/${selectedProduct.id}`, {
-        withCredentials: true,
-      });
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", selectedProduct.id);
+      if (error) throw error;
       toast.success('Product deleted successfully');
       setIsDeleteDialogOpen(false);
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to delete product');
+      toast.error(error?.message || 'Failed to delete product');
     }
   };
 
   const toggleDiscount = async (product) => {
     try {
-      await axios.put(`${API_URL}/api/products/${product.id}`, {
-        discount_active: !product.discount_active,
-      }, {
-        withCredentials: true,
-      });
+      const { error } = await supabase
+        .from("products")
+        .update({ discount_active: !product.discount_active })
+        .eq("id", product.id);
+      if (error) throw error;
       toast.success(product.discount_active ? 'Discount disabled' : 'Discount enabled');
       fetchData();
     } catch (error) {
@@ -457,11 +436,11 @@ const ProductsManagement = () => {
 
   const toggleStock = async (product) => {
     try {
-      await axios.put(`${API_URL}/api/products/${product.id}`, {
-        in_stock: !product.in_stock,
-      }, {
-        withCredentials: true,
-      });
+      const { error } = await supabase
+        .from("products")
+        .update({ in_stock: !product.in_stock })
+        .eq("id", product.id);
+      if (error) throw error;
       toast.success(product.in_stock ? 'Marked as Out of Stock' : 'Marked as In Stock');
       fetchData();
     } catch (error) {
@@ -505,7 +484,7 @@ const ProductsManagement = () => {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <img
-                          src={product.image_url.startsWith('/') ? `${API_URL}${product.image_url}` : product.image_url}
+                          src={product.image_url}
                           alt={product.name}
                           className="w-12 h-12 rounded-lg object-cover"
                         />
@@ -517,7 +496,9 @@ const ProductsManagement = () => {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="capitalize">{product.category.replace('-', ' ')}</TableCell>
+                    <TableCell className="capitalize">
+                      {getCategoryName(product.category_id, categories)}
+                    </TableCell>
                     <TableCell>
                       <div>
                         {product.discount_active && product.discount_percentage > 0 ? (
@@ -538,8 +519,8 @@ const ProductsManagement = () => {
                           <button
                             onClick={() => toggleDiscount(product)}
                             className={`group relative flex items-center gap-2 px-3 py-1.5 rounded-full font-medium text-sm transition-all duration-300 ${
-                              product.discount_active 
-                                ? 'bg-gradient-to-r from-[#FFD166] to-[#FFA500] text-white shadow-md hover:shadow-lg hover:scale-105' 
+                              product.discount_active
+                                ? 'bg-gradient-to-r from-[#FFD166] to-[#FFA500] text-white shadow-md hover:shadow-lg hover:scale-105'
                                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                             }`}
                             data-testid={`discount-toggle-${product.id}`}
@@ -547,9 +528,7 @@ const ProductsManagement = () => {
                             <Percent className="w-3.5 h-3.5" />
                             <span>{product.discount_percentage}% OFF</span>
                             <span className={`ml-1 w-5 h-5 rounded-full flex items-center justify-center text-xs ${
-                              product.discount_active 
-                                ? 'bg-white/30' 
-                                : 'bg-gray-300'
+                              product.discount_active ? 'bg-white/30' : 'bg-gray-300'
                             }`}>
                               {product.discount_active ? '✓' : '○'}
                             </span>
@@ -613,7 +592,7 @@ const ProductsManagement = () => {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-white border-2 border-[#F3E8FF] shadow-2xl">
           <DialogHeader>
             <DialogTitle style={{ fontFamily: 'Fredoka, sans-serif' }}>
               {selectedProduct ? 'Edit Product' : 'Add New Product'}
@@ -631,17 +610,23 @@ const ProductsManagement = () => {
                 <span className="text-xs text-gray-400">(Multiple allowed)</span>
               </Label>
               <div className="mt-2 space-y-3">
-                {/* Image Grid */}
                 {imagePreviews.length > 0 && (
                   <div className="grid grid-cols-3 gap-3">
                     {imagePreviews.map((preview, index) => (
-                      <div key={index} className={`relative rounded-xl overflow-hidden border-2 ${formData.image_url === formData.images[index] ? 'border-[#FF6B9E] ring-2 ring-[#FF6B9E]/30' : 'border-[#F3E8FF]'}`}>
+                      <div
+                        key={index}
+                        className={`relative rounded-xl overflow-hidden border-2 ${
+                          formData.image_url === formData.images[index]
+                            ? 'border-[#FF6B9E] ring-2 ring-[#FF6B9E]/30'
+                            : 'border-[#F3E8FF]'
+                        }`}
+                      >
                         <img
                           src={preview}
                           alt={`Preview ${index + 1}`}
                           className="w-full h-24 object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/0 hover:bg-black/40 transition-colors flex items-center justify-center gap-1 opacity-0 hover:opacity-100">
+                        <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center gap-1 opacity-0 hover:opacity-100">
                           <button
                             type="button"
                             onClick={() => setMainImage(index)}
@@ -668,18 +653,19 @@ const ProductsManagement = () => {
                     ))}
                   </div>
                 )}
-                
-                {/* Add More Images Button */}
+
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full h-32 rounded-xl border-2 border-dashed border-[#F3E8FF] flex flex-col items-center justify-center cursor-pointer hover:border-[#FF6B9E] transition-colors bg-[#FAFAFA]"
+                  className="w-full h-32 rounded-xl border-2 border-dashed border-[#F3E8FF] flex flex-col items-center justify-center cursor-pointer hover:border-[#FF6B9E] transition-colors bg-white"
                 >
                   {uploading ? (
                     <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#FF6B9E] border-t-transparent"></div>
                   ) : (
                     <>
                       <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-500">{imagePreviews.length > 0 ? 'Add more images' : 'Click to upload images'}</p>
+                      <p className="text-sm text-gray-500">
+                        {imagePreviews.length > 0 ? 'Add more images' : 'Click to upload images'}
+                      </p>
                       <p className="text-xs text-gray-400 mt-1">JPEG, PNG, WebP or GIF • Different angles, sizes, colors</p>
                     </>
                   )}
@@ -692,59 +678,6 @@ const ProductsManagement = () => {
                   className="hidden"
                   multiple
                   data-testid="product-image-upload"
-                />
-              </div>
-            </div>
-
-            {/* Video Upload Section */}
-            <div>
-              <Label className="flex items-center gap-2">
-                <span className="text-[#82D1B2]">▶</span>
-                Product Video
-                <span className="text-xs text-gray-400">(Optional - max 50MB)</span>
-              </Label>
-              <div className="mt-2">
-                {videoPreview ? (
-                  <div className="relative rounded-xl overflow-hidden border-2 border-[#82D1B2]">
-                    <video
-                      src={videoPreview}
-                      className="w-full h-40 object-cover"
-                      controls
-                      muted
-                    />
-                    <button
-                      type="button"
-                      onClick={removeVideo}
-                      className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => videoInputRef.current?.click()}
-                    className="w-full h-32 rounded-xl border-2 border-dashed border-[#82D1B2]/50 flex flex-col items-center justify-center cursor-pointer hover:border-[#82D1B2] transition-colors bg-[#82D1B2]/5"
-                  >
-                    {uploadingVideo ? (
-                      <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#82D1B2] border-t-transparent"></div>
-                    ) : (
-                      <>
-                        <div className="w-12 h-12 rounded-full bg-[#82D1B2]/20 flex items-center justify-center mb-2">
-                          <span className="text-2xl text-[#82D1B2]">▶</span>
-                        </div>
-                        <p className="text-sm text-gray-500">Click to upload video</p>
-                        <p className="text-xs text-gray-400 mt-1">MP4, WebM, MOV or AVI</p>
-                      </>
-                    )}
-                  </div>
-                )}
-                <input
-                  ref={videoInputRef}
-                  type="file"
-                  accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
-                  onChange={handleVideoUpload}
-                  className="hidden"
-                  data-testid="product-video-upload"
                 />
               </div>
             </div>
@@ -790,15 +723,15 @@ const ProductsManagement = () => {
               <div>
                 <Label htmlFor="category">Category</Label>
                 <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                  value={formData.category_id}
+                  onValueChange={(value) => setFormData({ ...formData, category_id: value })}
                 >
                   <SelectTrigger data-testid="product-category-select">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.slug}>
+                      <SelectItem key={cat.id} value={cat.id}>
                         {cat.name}
                       </SelectItem>
                     ))}
@@ -842,7 +775,10 @@ const ProductsManagement = () => {
               </div>
               {formData.discount_active && parseFloat(formData.discount_percentage) > 0 && formData.price && (
                 <p className="text-sm text-[#cc9900] mt-2">
-                  Final price: <strong>₹{Math.round(parseFloat(formData.price) * (1 - parseFloat(formData.discount_percentage) / 100))}</strong>
+                  Final price:{' '}
+                  <strong>
+                    ₹{Math.round(parseFloat(formData.price) * (1 - parseFloat(formData.discount_percentage) / 100))}
+                  </strong>
                 </p>
               )}
             </div>
@@ -900,14 +836,24 @@ const ProductsManagement = () => {
 // Featured Products Management
 const FeaturedProductsManagement = () => {
   const [products, setProducts] = useState([]);
-  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
-      const prodRes = await axios.get(`${API_URL}/api/products`);
-      setProducts(prodRes.data);
-      setFeaturedProducts(prodRes.data.filter(p => p.is_featured));
+      const { data: productsData, error: productsError } = await supabase
+        .from("products")
+        .select("*");
+
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from("categories")
+        .select("*");
+
+      if (productsError) throw productsError;
+      if (categoriesError) throw categoriesError;
+
+      setProducts(productsData || []);
+      setCategories(categoriesData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -921,11 +867,11 @@ const FeaturedProductsManagement = () => {
 
   const toggleFeatured = async (product) => {
     try {
-      await axios.put(`${API_URL}/api/products/${product.id}`, {
-        is_featured: !product.is_featured,
-      }, {
-        withCredentials: true,
-      });
+      const { error } = await supabase
+        .from("products")
+        .update({ is_featured: !product.is_featured })
+        .eq("id", product.id);
+      if (error) throw error;
       toast.success(product.is_featured ? 'Removed from featured' : 'Added to featured');
       fetchData();
     } catch (error) {
@@ -933,7 +879,8 @@ const FeaturedProductsManagement = () => {
     }
   };
 
-  const nonFeaturedProducts = products.filter(p => !p.is_featured);
+  const featuredProducts = products.filter((p) => p.is_featured);
+  const nonFeaturedProducts = products.filter((p) => !p.is_featured);
 
   return (
     <div data-testid="admin-featured-management">
@@ -957,7 +904,7 @@ const FeaturedProductsManagement = () => {
               <Star className="w-5 h-5 text-[#FFD166] fill-[#FFD166]" />
               Currently Featured ({featuredProducts.length})
             </h2>
-            
+
             {featuredProducts.length === 0 ? (
               <div className="bg-[#FFD166]/10 border-2 border-dashed border-[#FFD166] rounded-2xl p-8 text-center">
                 <Sparkles className="w-12 h-12 text-[#FFD166] mx-auto mb-3" />
@@ -973,7 +920,7 @@ const FeaturedProductsManagement = () => {
                   >
                     <div className="relative">
                       <img
-                        src={product.image_url.startsWith('/') ? `${API_URL}${product.image_url}` : product.image_url}
+                        src={product.image_url}
                         alt={product.name}
                         className="w-full h-40 object-cover"
                       />
@@ -988,7 +935,9 @@ const FeaturedProductsManagement = () => {
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-[#2D283E] truncate">{product.name}</h3>
-                      <p className="text-sm text-gray-500 capitalize">{product.category.replace('-', ' ')}</p>
+                      <p className="text-sm text-gray-500 capitalize">
+                        {getCategoryName(product.category_id, categories)}
+                      </p>
                       <div className="flex items-center justify-between mt-3">
                         <span className="font-bold text-[#FF6B9E]">₹{product.price}</span>
                         <button
@@ -1012,7 +961,7 @@ const FeaturedProductsManagement = () => {
               <Package className="w-5 h-5 text-[#82D1B2]" />
               Available Products ({nonFeaturedProducts.length})
             </h2>
-            
+
             {nonFeaturedProducts.length === 0 ? (
               <div className="bg-gray-100 rounded-2xl p-8 text-center">
                 <p className="text-gray-500">All products are already featured!</p>
@@ -1026,7 +975,7 @@ const FeaturedProductsManagement = () => {
                   >
                     <div className="relative">
                       <img
-                        src={product.image_url.startsWith('/') ? `${API_URL}${product.image_url}` : product.image_url}
+                        src={product.image_url}
                         alt={product.name}
                         className="w-full h-40 object-cover"
                       />
@@ -1045,7 +994,9 @@ const FeaturedProductsManagement = () => {
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-[#2D283E] truncate">{product.name}</h3>
-                      <p className="text-sm text-gray-500 capitalize">{product.category.replace('-', ' ')}</p>
+                      <p className="text-sm text-gray-500 capitalize">
+                        {getCategoryName(product.category_id, categories)}
+                      </p>
                       <div className="flex items-center justify-between mt-3">
                         <span className="font-bold text-[#FF6B9E]">₹{product.price}</span>
                         <button

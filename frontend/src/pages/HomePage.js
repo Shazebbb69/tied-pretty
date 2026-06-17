@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import Header from '../components/Header';
+import { supabase } from "../lib/supabase";
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
 import CategoryCard from '../components/CategoryCard';
 import { ArrowRight, Heart, Sparkles, Gift, Star } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
 const LOGO_URL = "https://customer-assets.emergentagent.com/job_craft-corner-23/artifacts/zjr1h6m2_Screenshot_2026-03-30-21-43-48-964_com.instagram.android-edit.jpg";
 
 const HomePage = () => {
@@ -17,25 +16,33 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [catRes, prodRes, featuredRes] = await Promise.all([
-          axios.get(`${API_URL}/api/categories`),
-          axios.get(`${API_URL}/api/products`),
-          axios.get(`${API_URL}/api/products/featured`)
-        ]);
-        setCategories(catRes.data);
-        setAllProducts(prodRes.data);
-        // Use featured products if available, otherwise show first 4 products
-        setFeaturedProducts(featuredRes.data.length > 0 ? featuredRes.data : prodRes.data.slice(0, 4));
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const fetchData = async () => {
+    try {
+      const { data: categoriesData, error: categoriesError } =
+        await supabase.from("categories").select("*");
+
+      const { data: productsData, error: productsError } =
+        await supabase.from("products").select("*");
+
+      if (categoriesError) throw categoriesError;
+      if (productsError) throw productsError;
+
+      setCategories(categoriesData || []);
+      setAllProducts(productsData || []);
+
+      const featured =
+        (productsData || []).filter((p) => p.is_featured);
+
+      setFeaturedProducts(featured);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden" data-testid="home-page">
@@ -51,18 +58,18 @@ const HomePage = () => {
               <div className="text-center md:text-left">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white rounded-full shadow-sm mb-4 sm:mb-6 border-2 border-[#F3E8FF]">
                   <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-[#FFD166]" />
-                  <span className="text-xs sm:text-sm font-medium text-[#2D283E]">Handcrafted with Love</span>
+                  <span className="text-xs sm:text-sm font-medium text-[#2D283E]">From Me to You</span>
                 </div>
                 
                 <h1 
                   className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#2D283E] mb-4 sm:mb-6 leading-tight"
                   style={{ fontFamily: 'Fredoka, sans-serif' }}
                 >
-                  Unique <span className="text-[#FF6B9E]">Handmade</span> Gifts for Your Loved Ones
+                  Handmade with <span className="text-[#FF6B9E]">Love</span> for Every Moment
                 </h1>
                 
                 <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-6 sm:mb-8 max-w-lg mx-auto md:mx-0">
-                  Discover beautiful crochet creations, bouquets, keychains, and more. Each piece is crafted with care and made especially for you.
+                  Handmade with love, made to make every moment a little more special ✨ 
                 </p>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-center md:justify-start">
@@ -91,7 +98,7 @@ const HomePage = () => {
               <div className="relative">
                 <div className="relative rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white">
                   <img
-                    src="https://images.pexels.com/photos/16228896/pexels-photo-16228896.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
+                    src="herosection.jpeg"
                     alt="Handmade crafts"
                     className="w-full h-[400px] md:h-[500px] object-cover"
                   />
@@ -135,10 +142,10 @@ const HomePage = () => {
                 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#2D283E] mb-4"
                 style={{ fontFamily: 'Fredoka, sans-serif' }}
               >
-                Shop by Category
+                Choose what you love
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Explore our collection of handmade treasures, each category filled with unique creations waiting to be discovered.
+                Browse products made with love and find your perfect match 💌
               </p>
             </div>
 
@@ -173,10 +180,10 @@ const HomePage = () => {
                     className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#2D283E]"
                     style={{ fontFamily: 'Fredoka, sans-serif' }}
                   >
-                    Featured Products
+                    Pretty Picks
                   </h2>
                 </div>
-                <p className="text-gray-600">Special picks just for you</p>
+                <p className="text-gray-600">Just for you</p>
               </div>
               <Link
                 to="/products"
@@ -235,10 +242,10 @@ const HomePage = () => {
                   className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4"
                   style={{ fontFamily: 'Fredoka, sans-serif' }}
                 >
-                  Want Something Custom?
+                  Inspired by you crafted by us.
                 </h2>
                 <p className="text-gray-300 mb-8 max-w-lg mx-auto">
-                  We love creating personalized gifts! Tell us your idea and we'll bring it to life with our handcrafted magic.
+                  Your idea, our handmade touch. 
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <a

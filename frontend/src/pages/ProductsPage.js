@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import { supabase } from '../lib/supabase';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProductCard from '../components/ProductCard';
 import { Search, Filter, X } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
 
 const ProductsPage = () => {
   const { category } = useParams();
@@ -22,34 +21,53 @@ const ProductsPage = () => {
   }, [category]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [catRes, prodRes] = await Promise.all([
-          axios.get(`${API_URL}/api/categories`),
-          axios.get(`${API_URL}/api/products`, {
-            params: {
-              category: selectedCategory || undefined,
-              search: searchQuery || undefined,
-            },
-          }),
-        ]);
-        setCategories(catRes.data);
-        setProducts(prodRes.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [selectedCategory, searchQuery]);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !selectedCategory || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+      const { data: categoriesData, error: categoriesError } =
+        await supabase
+          .from('categories')
+          .select('*');
+
+      const { data: productsData, error: productsError } =
+        await supabase
+          .from('products')
+          .select('*');
+
+      if (categoriesError) throw categoriesError;
+      if (productsError) throw productsError;
+
+      setCategories(categoriesData || []);
+      setProducts(productsData || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
+
+const filteredProducts = products.filter((product) => {
+  const matchesSearch =
+    product.name?.toLowerCase().includes(searchQuery.toLowerCase());
+
+  const productCategory = categories.find(
+    (c) => c.id === product.category_id
+  );
+
+  const matchesCategory =
+    !selectedCategory ||
+    productCategory?.slug === selectedCategory;
+
+  return matchesSearch && matchesCategory;
+});
+
+console.log("Products:", products);
+console.log("Categories:", categories);
+console.log("Filtered:", filteredProducts);
 
   const getCategoryName = (slug) => {
     const cat = categories.find((c) => c.slug === slug);
@@ -225,9 +243,21 @@ const ProductsPage = () => {
                 Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" data-testid="products-grid">
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
+                {filteredProducts.map((product) => {
+  const categoryName =
+    categories.find((c) => c.id === product.category_id)?.name ||
+    "Category";
+
+  return (
+    <ProductCard
+      key={product.id}
+      product={{
+        ...product,
+        category: categoryName,
+      }}
+    />
+  );
+})}
               </div>
             </>
           )}
