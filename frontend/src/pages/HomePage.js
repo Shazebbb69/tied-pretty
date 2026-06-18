@@ -112,8 +112,8 @@ const HomePage = () => {
                       <Star className="w-6 h-6 text-[#FFD166] fill-[#FFD166]" />
                     </div>
                     <div>
-                      <p className="font-bold text-[#2D283E]">100+</p>
-                      <p className="text-sm text-gray-500">Happy Customers</p>
+                      <p className="font-bold text-[#2D283E]">7/11 🫶🏻</p>
+                      <p className="text-sm text-gray-500"></p>
                     </div>
                   </div>
                 </div>
@@ -151,13 +151,13 @@ const HomePage = () => {
 
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                {[...Array(7)].map((_, i) => (
+                {[...Array(categories.length || 8)].map((_, i) => (
                   <div key={i} className="aspect-square bg-gray-200 rounded-2xl animate-pulse" />
                 ))}
               </div>
             ) : (
               <div className="bento-grid">
-                {categories.slice(0, 7).map((category, index) => (
+                {categories.map((category, index) => (
                   <CategoryCard
                     key={category.id}
                     category={category}

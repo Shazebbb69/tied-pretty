@@ -26,7 +26,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-gray-300 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">
-              Handcrafted with love. Each piece is unique and made especially for you.
+              Behind every handmade piece is a story💌
             </p>
             <div className="flex items-center gap-3">
               <a
