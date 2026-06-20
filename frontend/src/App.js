@@ -54,7 +54,34 @@ function AppRoutes() {
   );
 }
 
+function MaintenancePage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#FFFDF7] px-4">
+      <div className="text-center max-w-lg">
+        <h1 className="text-4xl font-bold text-[#FF6B9E] mb-4">
+          Website Under Maintenance
+        </h1>
+
+        <p className="text-gray-600 text-lg mb-6">
+          We are currently updating the website to improve your experience.
+          Please check back soon.
+        </p>
+
+        <p className="text-gray-500">
+          For urgent inquiries, please contact us on WhatsApp or Instagram.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function App() {
+  const MAINTENANCE_MODE = true;
+
+  if (MAINTENANCE_MODE) {
+    return <MaintenancePage />;
+  }
+
   return (
     <AuthProvider>
       <BrowserRouter>

@@ -69,9 +69,9 @@ const HomePage = () => {
                 </h1>
                 
                 <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-6 sm:mb-8 max-w-lg mx-auto md:mx-0">
-                  Handmade with love, made to make every moment a little more special ✨ 
+                  Handmade with love, made to make every moment a little more special ✨ 7/11 🫶🏻
                 </p>
-                
+      
                 <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-center md:justify-start">
                   <Link
                     to="/products"
@@ -112,7 +112,7 @@ const HomePage = () => {
                       <Star className="w-6 h-6 text-[#FFD166] fill-[#FFD166]" />
                     </div>
                     <div>
-                      <p className="font-bold text-[#2D283E]">7/11 🫶🏻</p>
+                      <p className="font-bold text-[#2D283E]">Happy customers 🫶🏻</p>
                       <p className="text-sm text-gray-500"></p>
                     </div>
                   </div>
@@ -245,7 +245,7 @@ const HomePage = () => {
                   Inspired by you crafted by us.
                 </h2>
                 <p className="text-gray-300 mb-8 max-w-lg mx-auto">
-                  Your idea, our handmade touch. 
+                  Something Custom?
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <a
